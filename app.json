@@ -1,0 +1,11 @@
+{
+    "Type": "nap::ProjectInfo",
+    "mID": "ProjectInfo",
+    "Title": "Love Lights",
+    "Version": "1.0.0",
+    "Data": "data/laser.json",
+    "PathMapping": "cache/path_mapping.json",
+    "RequiredModules": [
+        "naplovelights"
+    ]
+}

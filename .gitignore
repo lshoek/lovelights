@@ -1,0 +1,11 @@
+cached_project_json.cmake
+cached_module_json.cmake
+cached_app_json.cmake
+service_config.json
+.ini/
+cache/
+regenerate.sh
+regenerate.bat
+build.bat
+build.sh
+CMakeLists.txt

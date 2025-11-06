@@ -1,0 +1,113 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+#pragma once
+
+// Core includes
+#include <nap/resourcemanager.h>
+#include <nap/resourceptr.h>
+
+// Module includes
+#include <renderservice.h>
+#include <renderadvancedservice.h>
+#include <imguiservice.h>
+#include <sceneservice.h>
+#include <inputservice.h>
+#include <scene.h>
+#include <renderwindow.h>
+#include <rendertarget.h>
+#include <entity.h>
+#include <app.h>
+#include <appgui.h>
+#include <appstate.h>
+
+namespace nap 
+{
+	using namespace rtti;
+
+    /**
+     * LoveLightsApp
+     */
+    class LoveLightsApp : public App 
+	{
+    public:
+		/**
+		 * Constructor
+		 */
+        LoveLightsApp(nap::Core& core) : App(core) {}
+
+        /**
+         * Initialize all the services and app specific data structures
+		 * @param errorState contains the error code when initialization fails
+		 * @return if initialization succeeded
+         */
+        bool init(utility::ErrorState& errorState) override;
+
+		/**
+		 * Update is called every frame, before render.
+		 * @param deltaTime the time in seconds between calls
+		 */
+		void update(double deltaTime) override;
+
+        /**
+         * Render is called after update. Use this call to render objects to a specific target
+         */
+        void render() override;
+
+        /**
+         * Called when the app receives a window message.
+		 * @param windowEvent the window message that occurred
+         */
+        void windowMessageReceived(WindowEventPtr windowEvent) override;
+
+        /**
+         * Called when the app receives an input message (from a mouse, keyboard etc.)
+		 * @param inputEvent the input event that occurred
+         */
+        void inputMessageReceived(InputEventPtr inputEvent) override;
+
+        /**
+		 * Called when the app is shutting down after quit() has been invoked
+		 * @return the application exit code, this is returned when the main loop is exited
+         */
+		int shutdown() override { return 0; }
+
+        /**
+         * Resets some visual components
+         */
+        void onReset();
+
+    private:
+        ResourceManager*			mResourceManager = nullptr;			///< Manages all the loaded data
+		RenderService*				mRenderService = nullptr;			///< Render Service that handles render calls
+		RenderAdvancedService*		mRenderAdvancedService = nullptr;	///< Render Service that handles render calls
+		SceneService*				mSceneService = nullptr;			///< Manages all the objects in the scene
+		InputService*				mInputService = nullptr;			///< Input service for processing input
+		IMGuiService*				mGuiService = nullptr;				///< Manages GUI related update / draw calls
+
+		ObjectPtr<AppState>			mAppState;							///< Pointer to the app state
+		ObjectPtr<RenderWindow>		mRenderWindow;						///< Pointer to the render window
+		ObjectPtr<RenderWindow>		mControlWindow;						///< Pointer to the control window
+		ObjectPtr<RenderTarget>		mColorTarget;						///< Pointer to the color target
+		ObjectPtr<RenderTarget>		mStencilTarget;						///< Pointer to the stencil target
+		ObjectPtr<Scene>			mScene;								///< Pointer to the main scene
+		ObjectPtr<EntityInstance>	mCameraEntity;						///< Pointer to the entity that holds the perspective camera
+		ObjectPtr<EntityInstance>	mWorldEntity;						///< Pointer to the world entity
+		ObjectPtr<EntityInstance>	mAudioEntity;						///< Pointer to the audio entity
+		ObjectPtr<EntityInstance>	mVideoEntity;						///< Pointer to the video entity
+		ObjectPtr<EntityInstance>	mRenderEntity;						///< Pointer to the render entity
+		ObjectPtr<EntityInstance>	mCompositeEntity;					///< Pointer to the composite entity
+		ObjectPtr<EntityInstance>	mWarpEntity;						///< Pointer to the warp entity
+		ObjectPtr<EntityInstance>	mRenderCameraEntity;				///< Pointer to the render camera entity
+		ObjectPtr<EntityInstance>	mPlaylistEntity;				    ///< Pointer to the playlist entity
+
+		std::vector<ObjectPtr<AppGUI>> mAppGUIs;						///< AppGUIs
+
+        nap::Slot<> mHotReloadSlot = { [&]() -> void { onReset(); } };
+
+        bool mShowGUI = true;
+		bool mShowCursor = false;
+		bool mRandomizeOffset = false;
+        bool mClearStencil = false;
+	};
+}
