@@ -93,11 +93,9 @@ namespace nap
 		ObjectPtr<Scene>			mScene;								///< Pointer to the main scene
 		ObjectPtr<EntityInstance>	mCameraEntity;						///< Pointer to the entity that holds the perspective camera
 		ObjectPtr<EntityInstance>	mWorldEntity;						///< Pointer to the world entity
-		ObjectPtr<EntityInstance>	mAudioEntity;						///< Pointer to the audio entity
-		ObjectPtr<EntityInstance>	mVideoEntity;						///< Pointer to the video entity
 		ObjectPtr<EntityInstance>	mRenderEntity;						///< Pointer to the render entity
+		ObjectPtr<EntityInstance>	mComputeEntity;						///< Pointer to the compute entity
 		ObjectPtr<EntityInstance>	mCompositeEntity;					///< Pointer to the composite entity
-		ObjectPtr<EntityInstance>	mWarpEntity;						///< Pointer to the warp entity
 		ObjectPtr<EntityInstance>	mRenderCameraEntity;				///< Pointer to the render camera entity
 		ObjectPtr<EntityInstance>	mPlaylistEntity;				    ///< Pointer to the playlist entity
 

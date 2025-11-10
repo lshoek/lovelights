@@ -179,13 +179,75 @@
         },
         {
             "Type": "nap::Entity",
+            "mID": "ComputeEntity",
+            "Components": [
+                {
+                    "Type": "nap::ComputeLineComponent",
+                    "mID": "ComputeLine",
+                    "Enabled": true,
+                    "ComputeMaterialInstance": {
+                        "Uniforms": [],
+                        "Samplers": [],
+                        "Buffers": [
+                            {
+                                "Type": "nap::BufferBindingVec4",
+                                "mID": "InPositions",
+                                "Name": "InPositions",
+                                "Buffer": "VertexBufferVec4Dummy"
+                            },
+                            {
+                                "Type": "nap::BufferBindingVec4",
+                                "mID": "InNormals",
+                                "Name": "InNormals",
+                                "Buffer": "VertexBufferVec4Dummy"
+                            },
+                            {
+                                "Type": "nap::BufferBindingVec4",
+                                "mID": "InUVs",
+                                "Name": "InUVs",
+                                "Buffer": "VertexBufferVec4Dummy"
+                            },
+                            {
+                                "Type": "nap::BufferBindingVec4",
+                                "mID": "InColors",
+                                "Name": "InColors",
+                                "Buffer": "VertexBufferVec4Dummy"
+                            },
+                            {
+                                "Type": "nap::BufferBindingVec4",
+                                "mID": "OutPositions",
+                                "Name": "OutPositions",
+                                "Buffer": "VertexBufferVec4Dummy"
+                            }
+                        ],
+                        "Constants": [],
+                        "ComputeMaterial": "ComputeLineMaterial"
+                    },
+                    "Invocations": 1,
+                    "LineMesh": "LineMesh",
+                    "Properties": {
+                        "Frequency": "LineFrequencyParam",
+                        "LinePosFrequency": "LinePosFrequencyParam",
+                        "Speed": "LineSpeedParam",
+                        "Offset": "LineOffsetParam",
+                        "Amplitude": "LineAmplitudeParam",
+                        "Shift": "LineShiftParam",
+                        "SmoothTime": 0.10000000149011612
+                    },
+                    "ClockSpeed": 1.0
+                }
+            ],
+            "Children": []
+        },
+        {
+            "Type": "nap::Entity",
             "mID": "LaserEntity",
             "Components": [
                 {
                     "Type": "nap::LaserOutputComponent",
                     "mID": "LaserOutput",
                     "Dac": "EtherDreamDAC",
-                    "Line": "LineInput",
+                    "Line": "LineOutput",
                     "Transform": "../LineEntity/TransformLine",
                     "Properties": {
                         "Frustum": {
@@ -196,11 +258,12 @@
                         "FlipHorizontal": false,
                         "Framerate": 60,
                         "GapThreshold": 0.009999999776482582
-                    }
+                    },
+                    "Enable": false
                 },
                 {
                     "Type": "nap::TransformComponent",
-                    "mID": "TransformCanvas",
+                    "mID": "TransformLaser",
                     "Properties": {
                         "Translate": {
                             "x": 0.0,
@@ -218,58 +281,6 @@
                             "z": 1.0
                         },
                         "UniformScale": 1.0
-                    }
-                },
-                {
-                    "Type": "nap::RenderableMeshComponent",
-                    "mID": "RenderCanvas",
-                    "Visible": true,
-                    "Tags": [],
-                    "Layer": "",
-                    "Mesh": "CanvasMesh",
-                    "MaterialInstance": {
-                        "Uniforms": [
-                            {
-                                "Type": "nap::UniformStruct",
-                                "mID": "UniformStruct_a89393e3",
-                                "Name": "UBO",
-                                "Uniforms": [
-                                    {
-                                        "Type": "nap::UniformVec3",
-                                        "mID": "UniformVec3_e76ccfa0",
-                                        "Name": "color",
-                                        "Value": {
-                                            "x": 0.0,
-                                            "y": 0.0,
-                                            "z": 0.0
-                                        }
-                                    },
-                                    {
-                                        "Type": "nap::UniformFloat",
-                                        "mID": "UniformFloat_c9ef1b57",
-                                        "Name": "alpha",
-                                        "Value": 1.0
-                                    }
-                                ]
-                            }
-                        ],
-                        "Samplers": [],
-                        "Buffers": [],
-                        "Constants": [],
-                        "Material": "ConstantMaterial",
-                        "BlendMode": "Opaque",
-                        "DepthMode": "ReadWrite"
-                    },
-                    "LineWidth": 1.0,
-                    "ClipRect": {
-                        "Min": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "Max": {
-                            "x": 0.0,
-                            "y": 0.0
-                        }
                     }
                 }
             ],
@@ -302,46 +313,11 @@
                     }
                 },
                 {
-                    "Type": "nap::LineNoiseComponent",
-                    "mID": "ApplyNoise",
-                    "Properties": {
-                        "Frequency": "LineFrequencyParam",
-                        "LinePosFrequency": "LinePosFrequencyParam",
-                        "Speed": "LineSpeedParam",
-                        "Offset": "LineOffsetParam",
-                        "Amplitude": "LineAmplitudeParam",
-                        "Shift": "LineShiftParam",
-                        "SmoothTime": 0.10000000149011612
-                    },
-                    "ClockSpeed": 0.125,
-                    "LineIn": "LineInput",
-                    "LineOut": "LineOutput",
-                    "LineBlender": "",
-                    "UseLineBlender": false
-                },
-                {
-                    "Type": "nap::LineColorComponent",
-                    "mID": "ApplyColor",
-                    "Line": "LineOutput",
-                    "LineBlender": "",
-                    "UseLineBlender": false,
-                    "FirstColor": "LineColorOneParam",
-                    "SecondColor": "LineColorTwoParam",
-                    "Intensity": "LineMasterParam",
-                    "Wrap": true,
-                    "WrapPower": 0.5,
-                    "Link": false
-                },
-                {
-                    "Type": "nap::RenderableMeshComponent",
-                    "mID": "RenderLine",
+                    "Type": "nap::RenderLineComponent",
+                    "mID": "RenderLineComponent",
                     "Visible": true,
-                    "Tags": [
-                        "RenderTag_Default",
-                        "RenderTag_Stencil"
-                    ],
+                    "Tags": [],
                     "Layer": "",
-                    "Mesh": "LineOutput",
                     "MaterialInstance": {
                         "Uniforms": [],
                         "Samplers": [],
@@ -351,17 +327,11 @@
                         "BlendMode": "NotSet",
                         "DepthMode": "NotSet"
                     },
+                    "Color": "LineColorOneParam",
+                    "Opacity": "LineMasterParam",
                     "LineWidth": 4.0,
-                    "ClipRect": {
-                        "Min": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "Max": {
-                            "x": 0.0,
-                            "y": 0.0
-                        }
-                    }
+                    "PointSize": 32.0,
+                    "ComputeLine": "../../ComputeEntity/ComputeLine"
                 }
             ],
             "Children": []
@@ -800,7 +770,7 @@
                     "z": 1.0,
                     "w": 1.0
                 },
-                "Usage": "DynamicWrite"
+                "Usage": "Static"
             },
             "Start": {
                 "x": -0.5,
@@ -813,7 +783,7 @@
                 "z": 0.0
             },
             "Closed": false,
-            "Vertices": 500
+            "Vertices": 1024
         },
         {
             "Type": "nap::Line",
@@ -825,7 +795,7 @@
                     "z": 1.0,
                     "w": 1.0
                 },
-                "Usage": "DynamicWrite"
+                "Usage": "Static"
             },
             "Start": {
                 "x": -0.5,
@@ -838,36 +808,14 @@
                 "z": 0.0
             },
             "Closed": false,
-            "Vertices": 500
+            "Vertices": 1024
         },
         {
-            "Type": "nap::Material",
-            "mID": "LineMaterial",
-            "Uniforms": [],
-            "Samplers": [],
-            "Buffers": [],
-            "Constants": [],
-            "Shader": "LineShader",
-            "VertexAttributeBindings": [
-                {
-                    "MeshAttributeID": "Position",
-                    "ShaderAttributeID": "in_Position"
-                },
-                {
-                    "MeshAttributeID": "UV0",
-                    "ShaderAttributeID": "in_UV0"
-                },
-                {
-                    "MeshAttributeID": "Color0",
-                    "ShaderAttributeID": "in_Color0"
-                },
-                {
-                    "MeshAttributeID": "Normal",
-                    "ShaderAttributeID": "in_Normals"
-                }
-            ],
-            "BlendMode": "Opaque",
-            "DepthMode": "InheritFromBlendMode"
+            "Type": "nap::LineMesh",
+            "mID": "LineMesh",
+            "PolyLine": "LineInput",
+            "Usage": "Static",
+            "Count": 1024
         },
         {
             "Type": "nap::ParameterBlendGroup",
@@ -953,8 +901,8 @@
                     "Value": {
                         "Values": [
                             0.0,
-                            0.0,
-                            0.0
+                            0.03921568766236305,
+                            1.0
                         ]
                     }
                 },
@@ -1020,31 +968,6 @@
             "Value": 0,
             "Minimum": 0,
             "Maximum": 1
-        },
-        {
-            "Type": "nap::PlaneMesh",
-            "mID": "CanvasMesh",
-            "Usage": "Static",
-            "CullMode": "None",
-            "PolygonMode": "Fill",
-            "Size": {
-                "x": 1.0,
-                "y": 1.0
-            },
-            "Position": {
-                "x": 0.0,
-                "y": 0.0
-            },
-            "Color": {
-                "Values": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "Rows": 1,
-            "Columns": 1
         },
         {
             "Type": "nap::RenderTagGroup",
@@ -1278,6 +1201,65 @@
                     "VertexAttributeBindings": [],
                     "BlendMode": "Opaque",
                     "DepthMode": "InheritFromBlendMode"
+                },
+                {
+                    "Type": "nap::ComputeMaterial",
+                    "mID": "ComputeLineMaterial",
+                    "Uniforms": [],
+                    "Samplers": [],
+                    "Buffers": [],
+                    "Constants": [],
+                    "Shader": "ComputeLineShader"
+                },
+                {
+                    "Type": "nap::ComputeShaderFromFile",
+                    "mID": "ComputeLineShader",
+                    "ComputeShader": "shaders/line.comp",
+                    "EnableMaxGroupSizeDefault": false,
+                    "RestrictModuleIncludes": false
+                },
+                {
+                    "Type": "nap::Material",
+                    "mID": "LineMaterial",
+                    "Uniforms": [],
+                    "Samplers": [],
+                    "Buffers": [],
+                    "Constants": [],
+                    "Shader": "LineShader",
+                    "VertexAttributeBindings": [
+                        {
+                            "MeshAttributeID": "Position",
+                            "ShaderAttributeID": "in_Position"
+                        },
+                        {
+                            "MeshAttributeID": "UV0",
+                            "ShaderAttributeID": "in_UV0"
+                        },
+                        {
+                            "MeshAttributeID": "Color0",
+                            "ShaderAttributeID": "in_Color0"
+                        },
+                        {
+                            "MeshAttributeID": "Normal",
+                            "ShaderAttributeID": "in_Normals"
+                        }
+                    ],
+                    "BlendMode": "Opaque",
+                    "DepthMode": "InheritFromBlendMode"
+                },
+                {
+                    "Type": "nap::ShaderFromFile",
+                    "mID": "LineShader",
+                    "VertShader": "shaders/line.vert",
+                    "FragShader": "shaders/line.frag",
+                    "RestrictModuleIncludes": false
+                },
+                {
+                    "Type": "nap::ShaderFromFile",
+                    "mID": "CompositeShader",
+                    "VertShader": "shaders/composite.vert",
+                    "FragShader": "shaders/composite.frag",
+                    "RestrictModuleIncludes": false
                 }
             ],
             "Children": []
@@ -1384,22 +1366,20 @@
                 {
                     "Entity": "CompositeEntity",
                     "InstanceProperties": []
+                },
+                {
+                    "Entity": "ComputeEntity",
+                    "InstanceProperties": []
                 }
             ]
         },
         {
-            "Type": "nap::ShaderFromFile",
-            "mID": "CompositeShader",
-            "VertShader": "shaders/composite.vert",
-            "FragShader": "shaders/composite.frag",
-            "RestrictModuleIncludes": false
-        },
-        {
-            "Type": "nap::ShaderFromFile",
-            "mID": "LineShader",
-            "VertShader": "shaders/line.vert",
-            "FragShader": "shaders/line.frag",
-            "RestrictModuleIncludes": false
+            "Type": "nap::VertexBufferVec4",
+            "mID": "VertexBufferVec4Dummy",
+            "Usage": "Static",
+            "Count": 1,
+            "Clear": false,
+            "FillPolicy": ""
         }
     ]
 }

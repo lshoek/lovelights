@@ -29,6 +29,7 @@ RTTI_BEGIN_CLASS(nap::LaserOutputComponent)
 	RTTI_PROPERTY("Line",			&nap::LaserOutputComponent::mLine,				nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Transform",		&nap::LaserOutputComponent::mLineTransform,		nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Properties",		&nap::LaserOutputComponent::mProperties,		nap::rtti::EPropertyMetaData::Required | nap::rtti::EPropertyMetaData::Embedded)
+	RTTI_PROPERTY("Enable",			&nap::LaserOutputComponent::mEnable,			nap::rtti::EPropertyMetaData::Default)
 RTTI_END_CLASS
 
 RTTI_BEGIN_CLASS_NO_DEFAULT_CONSTRUCTOR(nap::LaserOutputComponentInstance)
@@ -72,20 +73,26 @@ namespace nap
 	bool LaserOutputComponentInstance::init(utility::ErrorState& errorState)
 	{
 		// Copy over link to the DAC
-		LaserOutputComponent* output_resource = getComponent<LaserOutputComponent>();
-		mDac = output_resource->mDac.get();
+		auto* resource = getComponent<LaserOutputComponent>();
+		mDac = resource->mDac.get();
 
 		// Copy over mesh
 		mLine = getComponent<LaserOutputComponent>()->mLine.get();
 
 		// Copy over properties
-		mProperties = output_resource->mProperties;
+		mProperties = resource->mProperties;
+
+		mEnabled = resource->mEnable;
+
 		return true;
 	}
 
 
 	void LaserOutputComponentInstance::update(double deltaTime)
 	{
+		if (!mEnabled)
+			return;
+
 		// Send the polyline to the dac based on the location of the laser and the location of the line
 		populateLaserBuffer(*mLine, mLineTransform->getGlobalTransform());
 	}

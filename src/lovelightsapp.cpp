@@ -10,6 +10,7 @@
 #include <perspcameracomponent.h>
 #include <rendertotexturecomponent.h>
 #include <renderbloomcomponent.h>
+#include <computecomponent.h>
 #include <depthsorter.h>
 #include <sdlhelpers.h>
 
@@ -59,15 +60,12 @@ namespace nap
 		if (!errorState.check(mScene != nullptr, "unable to find scene with name: %s", "Scene"))
 			return false;
 
-		// Get the camera and origin Gnomon entity
 		mCameraEntity 			= mScene->findEntity("CameraEntity");
 		mWorldEntity 			= mScene->findEntity("WorldEntity");
-		mAudioEntity 			= mScene->findEntity("AudioEntity");
-		mVideoEntity 			= mScene->findEntity("VideoEntity");
 		mRenderEntity 			= mScene->findEntity("RenderEntity");
+		mComputeEntity 			= mScene->findEntity("ComputeEntity");
 		mCompositeEntity 		= mScene->findEntity("CompositeEntity");
 		mRenderCameraEntity 	= mScene->findEntity("RenderCameraEntity");
-		mWarpEntity 			= mScene->findEntity("WarpEntity");
         mPlaylistEntity         = mScene->findEntity("PlaylistEntity");
 
 		mAppGUIs = mResourceManager->getObjects<AppGUI>();
@@ -101,6 +99,15 @@ namespace nap
 		// The system might wait until all commands that were previously associated with the new frame have been processed on the GPU.
 		// Multiple frames are in flight at the same time, but if the graphics load is heavy the system might wait here to ensure resources are available.
 		mRenderService->beginFrame();
+
+    	// Compute
+    	if (mRenderService->beginComputeRecording())
+    	{
+    		std::vector<ComputeComponentInstance*> compute_comps;
+    		mComputeEntity->getComponentsOfTypeRecursive<ComputeComponentInstance>(compute_comps);
+    		mRenderService->computeObjects(compute_comps);
+    		mRenderService->endComputeRecording();
+    	}
 
 		// Begin recording the render commands for the offscreen render target. Rendering always happens after compute.
 		// This prepares a command buffer and starts a render pass.
@@ -167,17 +174,6 @@ namespace nap
 			std::vector<RenderableComponentInstance*> comps;
 			mCompositeEntity->getComponentsOfTypeRecursive(comps);
 			mRenderService->renderObjects(*mRenderWindow, cam, comps);
-
-			if (mWarpEntity != nullptr)
-			{
-				// Get composite component responsible for rendering final texture
-				std::vector<RenderableComponentInstance*> render_comps;
-				mWarpEntity->getComponentsOfTypeRecursive<RenderableComponentInstance>(render_comps);
-
-				// Render warp components
-				mRenderService->renderObjects(*mRenderWindow, cam, { render_comps });
-			}
-
             mRenderWindow->endRendering();
             mRenderService->endRecording();
 		}

@@ -1,18 +1,18 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
-
 #pragma once
 
 #include <component.h>
 #include <componentptr.h>
-#include <polyline.h>
 #include <smoothdamp.h>
 #include <parameternumeric.h>
+#include <computecomponent.h>
+#include <linemesh.h>
 
 namespace nap
 {
-	class LineNoiseComponentInstance;
+	class ComputeLineComponentInstance;
 
 	/**
 	 * Properties associated with the line noise modulation component
@@ -32,17 +32,14 @@ namespace nap
 	/**
 	 * Resource of the LineNoiseComponent
 	 */
-	class NAPAPI LineNoiseComponent : public Component
+	class NAPAPI ComputeLineComponent : public ComputeComponent
 	{
-		RTTI_ENABLE(Component)
-		DECLARE_COMPONENT(LineNoiseComponent, LineNoiseComponentInstance)
+		RTTI_ENABLE(ComputeComponent)
+		DECLARE_COMPONENT(LineNoiseComponent, ComputeLineComponentInstance)
 	public:
-		ResourcePtr<PolyLine> mLineIn;					//< Property 'LineIn':
-		ResourcePtr<PolyLine> mLineOut;					//< Property 'LineOut':
-		bool mUseLineBlender = false;					//< Property 'UseLineBlender':
-
+		ResourcePtr<LineMesh> mLineMesh;				//< Property 'LineMesh':
 		NoiseProperties mProperties;					//< Property 'Properties': all modulation settings
-		float mClockSpeed = 1.0f;						//< Property 'ClockSpeed': speed multiplier
+		double mClockSpeed = 1.0;						//< Property 'ClockSpeed': speed multiplier
 	};
 
 
@@ -50,12 +47,11 @@ namespace nap
 	 * Displaces the vertices of a line based on the line normals and a noise pattern.
 	 * the noise is applied in the line's uv space
 	 */
-	class NAPAPI LineNoiseComponentInstance : public ComponentInstance
+	class NAPAPI ComputeLineComponentInstance : public ComputeComponentInstance
 	{
-		RTTI_ENABLE(ComponentInstance)
+		RTTI_ENABLE(ComputeComponentInstance)
 	public:
-		LineNoiseComponentInstance(EntityInstance& entity, Component& resource) :
-			ComponentInstance(entity, resource) {}
+		ComputeLineComponentInstance(EntityInstance& entity, Component& resource);
 
 		/**
 		* Initializes this component
@@ -68,27 +64,33 @@ namespace nap
 		*/
 		void update(double deltaTime) override;
 
-	protected:
 		/**
-		 * Updates the normals based on displaced positions
+		 *
+		 * @param commandBuffer
+		 * @param numInvocations
 		 */
-		static void updateNormals(std::vector<glm::vec3>& normals, const std::vector<glm::vec3>& vertices);
+		void onCompute(VkCommandBuffer commandBuffer, uint numInvocations) override;
 
-		PolyLine* mLineIn = nullptr;
-		PolyLine* mLineOut = nullptr;
+		/**
+		 *
+		 * @return
+		 */
+		LineMesh& getLineMesh() const { return *mLineMesh; }
 
-		// Smooth over time
-		math::SmoothOperator<float> mFreqSmoother					{ 1.0f, 0.1f };
-		math::SmoothOperator<float> mLinePosFreqSmoother			{ 1.0f, 0.1f };
-		math::SmoothOperator<float> mAmpSmoother					{ 1.0f, 0.1f };
-		math::SmoothOperator<float> mSpeedSmoother					{ 0.0f, 0.1f };
-		math::SmoothOperator<float> mOffsetSmoother					{ 0.0f, 0.1f };
-		math::SmoothOperator<float> mShiftSmoother					{ 0.0f, 0.1f };
-
+	protected:
+		LineMesh* mLineMesh = nullptr;
 		NoiseProperties mProperties;
-		bool mUseLineBlender = false;
-		float mClockSpeed = 1.0f;
-		float mCurrentTime = 0.0f;									// Current update time associated with this component
+
+		double mClockSpeed = 1.0;
+		double mElapsedClockTime = 0.0;
 		glm::vec3 mRandomSeed;
+		uint mBufferIndex = 0;
+
+		math::SmoothOperator<double> mFreqSmoother			{ 1.0, 0.1 };
+		math::SmoothOperator<double> mLinePosFreqSmoother	{ 1.0, 0.1 };
+		math::SmoothOperator<double> mAmpSmoother			{ 1.0, 0.1 };
+		math::SmoothOperator<double> mSpeedSmoother			{ 0.0, 0.1 };
+		math::SmoothOperator<double> mOffsetSmoother		{ 0.0, 0.1 };
+		math::SmoothOperator<double> mShiftSmoother			{ 0.0, 0.1 };
 	};
 }

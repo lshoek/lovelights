@@ -6,14 +6,15 @@
 
 // Local Includes
 #include "etherdreamdac.h"
+#include "linemesh.h"
 
 // External Includes
 #include <component.h>
-#include <polyline.h>
 #include <transformcomponent.h>
 #include <componentptr.h>
 #include <renderablemeshcomponent.h>
 #include <nap/resourceptr.h>
+
 
 namespace nap
 {
@@ -48,12 +49,14 @@ namespace nap
 		ResourcePtr<EtherDreamDac> mDac;
 
 		// Link to component that holds the line to send to the laser
-		ResourcePtr<PolyLine> mLine;
+		ResourcePtr<LineMesh> mLine;
 
 		ComponentPtr<TransformComponent> mLineTransform;
 
 		// Output properties
 		LaserOutputProperties mProperties;
+
+		bool mEnable = true;
 	};
 
 
@@ -108,5 +111,7 @@ namespace nap
 		std::vector<nap::EtherDreamPoint> mPoints;			//< DAC points
 		std::vector<glm::vec3> mVerts;						//< Converted vertex positions
 		std::vector<glm::vec4> mColors;						//< Converted vertex colors
+
+		bool mEnabled = true;
 	};
 }

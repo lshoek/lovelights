@@ -1,0 +1,76 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#version 450
+
+#extension GL_GOOGLE_include_directive : enable
+#include "noise.glslinc"
+
+layout(local_size_x_id = 0) in;
+
+// The MAX_GROUP_SIZE_X value is overwritten on pipeline creation
+layout(constant_id = 0) const uint MAX_GROUP_SIZE_X = 32;
+
+// Storage
+layout(std430) restrict readonly buffer InPositions
+{
+	vec4 inpositions[];
+};
+
+layout(std430) restrict writeonly buffer OutPositions
+{
+	vec4 outpositions[];
+};
+
+layout(std430) restrict readonly buffer InNormals
+{
+	vec4 innormals[];
+};
+
+layout(std430) restrict readonly buffer InUVs
+{
+	vec4 inuvs[];
+};
+
+layout(std430) restrict readonly buffer InColors
+{
+	vec4 incolors[];
+};
+
+uniform UBO
+{
+	float elapsedTime;
+	float freq;
+	float posFreq;
+	float amp;
+	float offset;
+	float shift;
+};
+
+// uint rgba8(vec4 col, float alpha)
+// {
+// 	col = clamp(col, 0.0, 1.0);
+// 	return (
+// 		(uint(col.r*255.0) & 0xff) << 24 |
+// 		(uint(col.g*255.0) & 0xff) << 16 |
+// 		(uint(col.b*255.0) & 0xff) << 8  |
+// 		(uint(col.a*255.0) & 0xff)
+// 	);
+// }
+
+void main()
+{
+	const uint gid = gl_GlobalInvocationID.x;
+
+	float offset = elapsedTime + offset;
+	vec2 shift = normalize(mix(vec2(1.0, 1.0), vec2(1.0, 0.0), posFreq)) * shift;
+
+	float pos = gid / 1024.0 - 0.5;
+	vec2 uv_sample = mix(vec2(inuvs[gid].x, inuvs[gid].y), vec2(pos, 0.0f), posFreq);
+
+	vec2 freq_shift = uv_sample * freq;
+	vec2 uv = freq_shift + shift + offset;
+	float v = simplexd(vec3(uv, 1.0)).w * amp;
+
+	outpositions[gid] = inpositions[gid] + (innormals[gid] * v);
+}
