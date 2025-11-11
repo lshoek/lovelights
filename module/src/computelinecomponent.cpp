@@ -26,6 +26,7 @@ RTTI_BEGIN_CLASS(nap::ComputeLineComponent)
 	RTTI_PROPERTY("LineMesh",			&nap::ComputeLineComponent::mLineMesh,		nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Properties",			&nap::ComputeLineComponent::mProperties,	nap::rtti::EPropertyMetaData::Required | nap::rtti::EPropertyMetaData::Embedded)
 	RTTI_PROPERTY("ClockSpeed",			&nap::ComputeLineComponent::mClockSpeed,	nap::rtti::EPropertyMetaData::Default)
+	RTTI_PROPERTY("ResetStorage",		&nap::ComputeLineComponent::mResetStorage,	nap::rtti::EPropertyMetaData::Default)
 RTTI_END_CLASS
 
 RTTI_BEGIN_CLASS_NO_DEFAULT_CONSTRUCTOR(nap::ComputeLineComponentInstance)
@@ -37,7 +38,7 @@ namespace nap
 	template <typename T>
 	static void createBufferBinding(const std::string& name, TypedGPUBufferNumeric<T>& buffer, ComputeMaterialInstance& mtl)
 	{
-		auto* binding = mtl.getOrCreateBuffer<TypedBufferBindingNumeric<T>>(name);
+		auto* binding = mtl.getOrCreateBuffer<TypedBufferBindingNumericInstance<T>>(name);
 		binding->setBuffer(buffer);
 	}
 
@@ -56,12 +57,14 @@ namespace nap
 		mProperties = resource->mProperties;
 		mClockSpeed = resource->mClockSpeed;
 		mLineMesh = resource->mLineMesh.get();
+		mResetStorage = resource->mResetStorage;
 
 		// Buffer bindings
-		createBufferBinding("OutPositions", mLineMesh->getPositionBuffer(0), getMaterialInstance());
-		createBufferBinding("InNormals", mLineMesh->getPositionBuffer(1), getMaterialInstance());
-		createBufferBinding("InUVs", mLineMesh->getUVBuffer(), getMaterialInstance());
-		createBufferBinding("InColors", mLineMesh->getColorBuffer(), getMaterialInstance());
+		createBufferBinding("InPositions", mLineMesh->getPositionBuffer(LineMesh::EBufferRank::Original), getMaterialInstance());
+		createBufferBinding("OutPositions", mLineMesh->getPositionBuffer(LineMesh::EBufferRank::Write), getMaterialInstance());
+		createBufferBinding("InNormals", mLineMesh->getNormalBuffer(LineMesh::EBufferRank::Read), getMaterialInstance());
+		createBufferBinding("InUVs", mLineMesh->getUVBuffer(LineMesh::EBufferRank::Read), getMaterialInstance());
+		createBufferBinding("InColors", mLineMesh->getColorBuffer(LineMesh::EBufferRank::Read), getMaterialInstance());
 
 		// Set smooth timing values
 		mAmpSmoother.mSmoothTime = mProperties.mSmoothTime;
@@ -118,11 +121,16 @@ namespace nap
 
 	void ComputeLineComponentInstance::onCompute(VkCommandBuffer commandBuffer, uint numInvocations)
 	{
+		if (mResetStorage)
+			mLineMesh->reset();
+
 		auto* binding = getMaterialInstance().getOrCreateBuffer<BufferBindingVec4Instance>("InPositions");
-		binding->setBuffer(mLineMesh->getPositionBuffer(0));
+		binding->setBuffer(mLineMesh->getPositionBuffer(LineMesh::EBufferRank::Read));
 
 		binding = getMaterialInstance().getOrCreateBuffer<BufferBindingVec4Instance>("OutPositions");
-		binding->setBuffer(mLineMesh->getPositionBuffer(1));
+		binding->setBuffer(mLineMesh->getPositionBuffer(LineMesh::EBufferRank::Write));
+
+		mLineMesh->swapPositionBuffer();
 
 		ComputeComponentInstance::onCompute(commandBuffer, numInvocations);
 	}

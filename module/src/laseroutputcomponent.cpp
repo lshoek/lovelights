@@ -26,7 +26,7 @@ RTTI_END_STRUCT
 
 RTTI_BEGIN_CLASS(nap::LaserOutputComponent)
 	RTTI_PROPERTY("Dac",			&nap::LaserOutputComponent::mDac,				nap::rtti::EPropertyMetaData::Required)
-	RTTI_PROPERTY("Line",			&nap::LaserOutputComponent::mLine,				nap::rtti::EPropertyMetaData::Required)
+	RTTI_PROPERTY("Line",			&nap::LaserOutputComponent::mLineMesh,				nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Transform",		&nap::LaserOutputComponent::mLineTransform,		nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Properties",		&nap::LaserOutputComponent::mProperties,		nap::rtti::EPropertyMetaData::Required | nap::rtti::EPropertyMetaData::Embedded)
 	RTTI_PROPERTY("Enable",			&nap::LaserOutputComponent::mEnable,			nap::rtti::EPropertyMetaData::Default)
@@ -77,7 +77,7 @@ namespace nap
 		mDac = resource->mDac.get();
 
 		// Copy over mesh
-		mLine = getComponent<LaserOutputComponent>()->mLine.get();
+		mLineMesh = getComponent<LaserOutputComponent>()->mLineMesh.get();
 
 		// Copy over properties
 		mProperties = resource->mProperties;
@@ -94,18 +94,19 @@ namespace nap
 			return;
 
 		// Send the polyline to the dac based on the location of the laser and the location of the line
-		populateLaserBuffer(*mLine, mLineTransform->getGlobalTransform());
+		populateLaserBuffer(*mLineMesh, mLineTransform->getGlobalTransform());
 	}
 
 
-	void LaserOutputComponentInstance::populateLaserBuffer(const PolyLine& line, const glm::mat4x4& lineXform)
+	void LaserOutputComponentInstance::populateLaserBuffer(const LineMesh& line, const glm::mat4x4& lineXform)
 	{
-		const Vec3VertexAttribute& vert_attr = line.getPositionAttr();
-		const Vec4VertexAttribute& colr_attr = line.getColorAttr();
+		const auto& verts = line.getPositionsLocal();
+		const auto& colors = line.getColorsLocal();
 
-		// Get attribute data
-		const std::vector<glm::vec3>& verts = line.getPositionAttr().getData();
-		const std::vector<glm::vec4>& colors = line.getColorAttr().getData();
+		std::vector<glm::vec3> verts3;
+		verts3.reserve(verts.size());
+		for (const auto& v : verts)
+			verts3.push_back(v);
 
 		assert(verts.size() == colors.size());
 		assert(verts.size() > 1);
@@ -116,8 +117,8 @@ namespace nap
 		mColors.resize(ppf);
 
 		// Check the distance between the first and end point
-		const glm::vec3& first_vert = verts.front();
-		const glm::vec3& last_vert = verts.back();
+		const glm::vec3& first_vert = verts3.front();
+		const glm::vec3& last_vert = verts3.back();
 
 		// Get gap distance
 		float gap_dist = glm::distance(first_vert, last_vert);
@@ -127,27 +128,32 @@ namespace nap
 		
 		// If there is a certain distance between the first and last vertex of the line we can redistribute the points
 		// otherwise the entire line is taken up by the initial line and there is no gap, ie: all points belong to the actual line
-		bool has_gap = gap_dist > mProperties.mGapThreshold && !(line.isClosed());
-		if (has_gap)
+		const bool is_closed = false;
+		// bool has_gap = gap_dist > mProperties.mGapThreshold && !(line.isClosed());
+
+		if (!is_closed)
 		{
 			// Get complete line distance
 			std::map<float, int> distance_map;
-			float line_dist = line.getDistances(distance_map);
+
+			float line_dist = getDistancesAlongLine(verts3, distance_map, false);
+			// float line_dist = line.getDistances(distance_map);
 
 			// Calculate gap to line point distribution
 			// The bigger the gap between the first and last vertex, the more gap points will be distributed
 			float lg_ratio = line_dist / gap_dist;
 			float lg_s = static_cast<float>(ppf + 1) / (lg_ratio + 1.0);
-			line_points = math::min(static_cast<int>(lg_ratio * lg_s), ppf);
+			line_points = std::min(static_cast<int>(lg_ratio * lg_s), ppf);
 		}
 
 		// Populate re-interpolated line buffer based on line length
-		float line_inc = 1.0f / static_cast<float>(std::max(line_points - (has_gap ? 1 : 0),1));
+		float line_inc = 1.0f / static_cast<float>(std::max(line_points - (!is_closed ? 1 : 0),1));
 		for (int i = 0; i < line_points; i++)
 		{
 			float sample_idx = line_inc * static_cast<float>(i);
-			line.getValue<glm::vec3>(vert_attr, sample_idx, mVerts[i]);
-			line.getValue<glm::vec4>(colr_attr, sample_idx, mColors[i]);
+
+			getValueAlongLine(verts3, sample_idx, is_closed, mVerts[i]);
+			getValueAlongLine(colors, sample_idx, is_closed, mColors[i]);
 		}
 
 		// Now populate the part in between the line (gap)

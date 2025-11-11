@@ -49,7 +49,7 @@ namespace nap
 		ResourcePtr<EtherDreamDac> mDac;
 
 		// Link to component that holds the line to send to the laser
-		ResourcePtr<LineMesh> mLine;
+		ResourcePtr<LineMesh> mLineMesh;
 
 		ComponentPtr<TransformComponent> mLineTransform;
 
@@ -78,25 +78,25 @@ namespace nap
 		}
 
 		// Init
-		virtual bool init(utility::ErrorState& errorState) override;
+		bool init(utility::ErrorState& errorState) override;
 
 		/**
 		 *	Update will send the last converted line to the laser
 		 */
-		virtual void update(double deltaTime) override;
+		void update(double deltaTime) override;
 
 		// Properties
 		LaserOutputProperties mProperties;
 
 		// Sets the line to send to the laser
-		void setPolyLine(nap::PolyLine& line)				{ mLine = &line; }
+		void setPolyLine(LineMesh& line)				{ mLineMesh = &line; }
 
 		// Sets the dac to send to the laser
-		void setDac(nap::EtherDreamDac& dac)				{ mDac = &dac; }
+		void setDac(EtherDreamDac& dac)					{ mDac = &dac; }
 
 	private:
 		// Populate Laser Buffer
-		void populateLaserBuffer(const PolyLine& line, const glm::mat4x4& lineXform);
+		void populateLaserBuffer(const LineMesh& line, const glm::mat4x4& lineXform);
 
 		// Xform associated with the line
 		ComponentInstancePtr<TransformComponent> mLineTransform = { this, &LaserOutputComponent::mLineTransform };
@@ -105,10 +105,10 @@ namespace nap
 		EtherDreamDac* mDac = nullptr;
 
 		// Component that holds the lines to draw
-		PolyLine* mLine = nullptr;
+		LineMesh* mLineMesh = nullptr;
 
 		// Converted laser points
-		std::vector<nap::EtherDreamPoint> mPoints;			//< DAC points
+		std::vector<EtherDreamPoint> mPoints;				//< DAC points
 		std::vector<glm::vec3> mVerts;						//< Converted vertex positions
 		std::vector<glm::vec4> mColors;						//< Converted vertex colors
 

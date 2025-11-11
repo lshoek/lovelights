@@ -184,19 +184,19 @@ namespace nap
 		// Overwrite the VkBuffer under the previously fetched position vertex attribute index.
 		int position_attr_binding_idx = mRenderableMesh.getVertexBufferBindingIndex(vertexid::position);
 		if (position_attr_binding_idx >= 0)
-			vertex_buffers[position_attr_binding_idx] = mMesh->getPositionBuffer(1).getBuffer();
+			vertex_buffers[position_attr_binding_idx] = mMesh->getPositionBuffer(LineMesh::EBufferRank::Read).getBuffer();
 
 		int normal_attr_binding_idx = mRenderableMesh.getVertexBufferBindingIndex(vertexid::normal);
 		if (normal_attr_binding_idx >= 0)
-			vertex_buffers[normal_attr_binding_idx] = mMesh->getNormalBuffer().getBuffer();
+			vertex_buffers[normal_attr_binding_idx] = mMesh->getNormalBuffer(LineMesh::EBufferRank::Read).getBuffer();
 
 		int uv_attr_binding_idx = mRenderableMesh.getVertexBufferBindingIndex(vertexid::uv);
 		if (uv_attr_binding_idx >= 0)
-			vertex_buffers[uv_attr_binding_idx] = mMesh->getUVBuffer().getBuffer();
+			vertex_buffers[uv_attr_binding_idx] = mMesh->getUVBuffer(LineMesh::EBufferRank::Read).getBuffer();
 
 		int color_attr_binding_idx = mRenderableMesh.getVertexBufferBindingIndex(vertexid::getColorName(0));
 		if (color_attr_binding_idx >= 0)
-			vertex_buffers[color_attr_binding_idx] = mMesh->getColorBuffer().getBuffer();
+			vertex_buffers[color_attr_binding_idx] = mMesh->getColorBuffer(LineMesh::EBufferRank::Read).getBuffer();
 
 		// Get offsets
 		const auto& offsets = mRenderableMesh.getVertexBufferOffsets();

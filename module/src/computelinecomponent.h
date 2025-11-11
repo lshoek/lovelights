@@ -40,6 +40,7 @@ namespace nap
 		ResourcePtr<LineMesh> mLineMesh;				//< Property 'LineMesh':
 		NoiseProperties mProperties;					//< Property 'Properties': all modulation settings
 		double mClockSpeed = 1.0;						//< Property 'ClockSpeed': speed multiplier
+		bool mResetStorage = false;						//< Property 'ResetStorage': resets storage buffer to original
 	};
 
 
@@ -65,14 +66,12 @@ namespace nap
 		void update(double deltaTime) override;
 
 		/**
-		 *
 		 * @param commandBuffer
 		 * @param numInvocations
 		 */
 		void onCompute(VkCommandBuffer commandBuffer, uint numInvocations) override;
 
 		/**
-		 *
 		 * @return
 		 */
 		LineMesh& getLineMesh() const { return *mLineMesh; }
@@ -85,6 +84,7 @@ namespace nap
 		double mElapsedClockTime = 0.0;
 		glm::vec3 mRandomSeed;
 		uint mBufferIndex = 0;
+		bool mResetStorage = false;
 
 		math::SmoothOperator<double> mFreqSmoother			{ 1.0, 0.1 };
 		math::SmoothOperator<double> mLinePosFreqSmoother	{ 1.0, 0.1 };

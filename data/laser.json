@@ -234,7 +234,8 @@
                         "Shift": "LineShiftParam",
                         "SmoothTime": 0.10000000149011612
                     },
-                    "ClockSpeed": 1.0
+                    "ClockSpeed": 1.0,
+                    "ResetStorage": true
                 }
             ],
             "Children": []
@@ -247,7 +248,7 @@
                     "Type": "nap::LaserOutputComponent",
                     "mID": "LaserOutput",
                     "Dac": "EtherDreamDAC",
-                    "Line": "LineOutput",
+                    "Line": "LineMesh",
                     "Transform": "../LineEntity/TransformLine",
                     "Properties": {
                         "Frustum": {

@@ -12,14 +12,14 @@ layout(local_size_x_id = 0) in;
 layout(constant_id = 0) const uint MAX_GROUP_SIZE_X = 32;
 
 // Storage
-layout(std430) restrict readonly buffer InPositions
-{
-	vec4 inpositions[];
-};
-
 layout(std430) restrict writeonly buffer OutPositions
 {
 	vec4 outpositions[];
+};
+
+layout(std430) restrict readonly buffer InPositions
+{
+	vec4 inpositions[];
 };
 
 layout(std430) restrict readonly buffer InNormals
