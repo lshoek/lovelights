@@ -13,12 +13,12 @@
 #include <renderglobals.h>
 
 RTTI_BEGIN_STRUCT(nap::NoiseProperties)
-	RTTI_PROPERTY("Frequency",			&nap::NoiseProperties::mFrequency,			nap::rtti::EPropertyMetaData::Required)
-	RTTI_PROPERTY("LinePosFrequency",	&nap::NoiseProperties::mLinePosFrequency,	nap::rtti::EPropertyMetaData::Required)
-	RTTI_PROPERTY("Speed",				&nap::NoiseProperties::mSpeed,				nap::rtti::EPropertyMetaData::Required)
+	RTTI_PROPERTY("ClockSpeed",			&nap::NoiseProperties::mClockSpeed,			nap::rtti::EPropertyMetaData::Required)
+	RTTI_PROPERTY("Wavelength",			&nap::NoiseProperties::mWavelength,			nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Offset",				&nap::NoiseProperties::mOffset,				nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Amplitude",			&nap::NoiseProperties::mAmplitude,			nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Shift",				&nap::NoiseProperties::mShift,				nap::rtti::EPropertyMetaData::Required)
+	RTTI_PROPERTY("Peak",				&nap::NoiseProperties::mPeak,				nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("SmoothTime",			&nap::NoiseProperties::mSmoothTime,			nap::rtti::EPropertyMetaData::Default)
 RTTI_END_STRUCT
 
@@ -67,23 +67,15 @@ namespace nap
 		createBufferBinding("InColors", mLineMesh->getColorBuffer(LineMesh::EBufferRank::Read), getMaterialInstance());
 
 		// Set smooth timing values
-		mAmpSmoother.mSmoothTime = mProperties.mSmoothTime;
-		mAmpSmoother.setValue(mProperties.mAmplitude->mValue);
+		for (auto* smoother : { &mAmplitudeSmoother, &mWavelengthSmoother, &mOffsetSmoother, &mSpeedSmoother, &mShiftSmoother, &mPeakSmoother })
+			smoother->mSmoothTime = mProperties.mSmoothTime;
 
-		mFreqSmoother.mSmoothTime = mProperties.mSmoothTime;
-		mFreqSmoother.setValue(mProperties.mFrequency->mValue);
-
-		mLinePosFreqSmoother.mSmoothTime = mProperties.mSmoothTime;
-		mLinePosFreqSmoother.setValue(mProperties.mLinePosFrequency->mValue);
-
-		mOffsetSmoother.mSmoothTime = mProperties.mSmoothTime;
+		mAmplitudeSmoother.setValue(mProperties.mAmplitude->mValue);
+		mWavelengthSmoother.setValue(mProperties.mWavelength->mValue);
 		mOffsetSmoother.setValue(mProperties.mOffset->mValue);
-
-		mSpeedSmoother.mSmoothTime = mProperties.mSmoothTime;
-		mSpeedSmoother.setValue(mProperties.mSpeed->mValue);
-
-		mShiftSmoother.mSmoothTime = mProperties.mSmoothTime;
+		mSpeedSmoother.setValue(mProperties.mClockSpeed->mValue);
 		mShiftSmoother.setValue(mProperties.mShift->mValue);
+		mPeakSmoother.setValue(mProperties.mPeak->mValue);
 
 		mRandomSeed =
 		{
@@ -99,28 +91,35 @@ namespace nap
 
 	void ComputeLineComponentInstance::update(double deltaTime)
 	{
+		if (!mEnabled)
+			return;
+
 		// Update smoothers
-		mSpeedSmoother.update(mProperties.mSpeed->mValue, deltaTime);
-		mFreqSmoother.update(mProperties.mFrequency->mValue, deltaTime);
-		mLinePosFreqSmoother.update(mProperties.mLinePosFrequency->mValue, deltaTime);
-		mAmpSmoother.update(mProperties.mAmplitude->mValue, deltaTime);
+		mSpeedSmoother.update(mProperties.mClockSpeed->mValue, deltaTime);
+		mWavelengthSmoother.update(mProperties.mWavelength->mValue, deltaTime);
+		mAmplitudeSmoother.update(mProperties.mAmplitude->mValue, deltaTime);
 		mOffsetSmoother.update(mProperties.mOffset->mValue, deltaTime);
 		mShiftSmoother.update(mProperties.mShift->mValue, deltaTime);
+		mPeakSmoother.update(mProperties.mPeak->mValue, deltaTime);
 
 		// Update current time
 		mElapsedClockTime += (deltaTime * mSpeedSmoother.getValue() * mClockSpeed);
 		auto* ubo = getMaterialInstance().getOrCreateUniform("UBO"); assert(ubo != nullptr);
 		ubo->getOrCreateUniform<UniformFloatInstance>("elapsedTime")->setValue(static_cast<float>(mElapsedClockTime));
-		ubo->getOrCreateUniform<UniformFloatInstance>("freq")->setValue(mFreqSmoother.getValue());
-		ubo->getOrCreateUniform<UniformFloatInstance>("posFreq")->setValue(mLinePosFreqSmoother.getValue());
-		ubo->getOrCreateUniform<UniformFloatInstance>("amp")->setValue(mAmpSmoother.getValue());
+		ubo->getOrCreateUniform<UniformFloatInstance>("wavelength")->setValue(mWavelengthSmoother.getValue());
+		ubo->getOrCreateUniform<UniformFloatInstance>("amplitude")->setValue(mAmplitudeSmoother.getValue());
 		ubo->getOrCreateUniform<UniformFloatInstance>("offset")->setValue(mOffsetSmoother.getValue());
 		ubo->getOrCreateUniform<UniformFloatInstance>("shift")->setValue(mShiftSmoother.getValue());
+		ubo->getOrCreateUniform<UniformFloatInstance>("peak")->setValue(mPeakSmoother.getValue());
+		ubo->getOrCreateUniform<UniformUIntInstance>("count")->setValue(mLineMesh->getMeshInstance().getNumVertices());
 	}
 
 
 	void ComputeLineComponentInstance::onCompute(VkCommandBuffer commandBuffer, uint numInvocations)
 	{
+		if (!mEnabled)
+			return;
+
 		if (mResetStorage)
 			mLineMesh->reset();
 

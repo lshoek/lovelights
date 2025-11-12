@@ -24,7 +24,7 @@
                     "Type": "nap::InfoWindow",
                     "mID": "InfoWindow",
                     "Name": "Performance",
-                    "Notes": "Low -> Frequency | Mid -> Offset | High -> Shift"
+                    "Notes": ""
                 }
             ],
             "Name": "Menu"
@@ -226,12 +226,12 @@
                     "Invocations": 1,
                     "LineMesh": "LineMesh",
                     "Properties": {
-                        "Frequency": "LineFrequencyParam",
-                        "LinePosFrequency": "LinePosFrequencyParam",
-                        "Speed": "LineSpeedParam",
+                        "ClockSpeed": "LineClockSpeedParam",
+                        "Wavelength": "LineWavelengthParam",
                         "Offset": "LineOffsetParam",
                         "Amplitude": "LineAmplitudeParam",
                         "Shift": "LineShiftParam",
+                        "Peak": "LinePeakParam",
                         "SmoothTime": 0.10000000149011612
                     },
                     "ClockSpeed": 1.0,
@@ -874,14 +874,6 @@
             "Parameters": [
                 {
                     "Type": "nap::ParameterFloat",
-                    "mID": "LinePosFrequencyParam",
-                    "Name": "LinePosFrequency",
-                    "Value": 1.0,
-                    "Minimum": 0.0,
-                    "Maximum": 1.0
-                },
-                {
-                    "Type": "nap::ParameterFloat",
                     "mID": "BlendSpeedParam",
                     "Name": "BlendSpeed",
                     "Value": 0.10000000149011612,
@@ -921,24 +913,24 @@
                 },
                 {
                     "Type": "nap::ParameterFloat",
-                    "mID": "LineFrequencyParam",
-                    "Name": "LineFrequency",
+                    "mID": "LineWavelengthParam",
+                    "Name": "Wavelength",
                     "Value": 1.0,
-                    "Minimum": 0.0,
-                    "Maximum": 20.0
-                },
-                {
-                    "Type": "nap::ParameterFloat",
-                    "mID": "LineSpeedParam",
-                    "Name": "LineSpeed",
-                    "Value": 0.10000000149011612,
                     "Minimum": 0.0,
                     "Maximum": 1.0
                 },
                 {
                     "Type": "nap::ParameterFloat",
+                    "mID": "LineClockSpeedParam",
+                    "Name": "ClockSpeed",
+                    "Value": 1.0,
+                    "Minimum": 0.0,
+                    "Maximum": 4.0
+                },
+                {
+                    "Type": "nap::ParameterFloat",
                     "mID": "LineOffsetParam",
-                    "Name": "LineOffset",
+                    "Name": "Offset",
                     "Value": 0.0,
                     "Minimum": 0.0,
                     "Maximum": 1.0
@@ -946,16 +938,24 @@
                 {
                     "Type": "nap::ParameterFloat",
                     "mID": "LineAmplitudeParam",
-                    "Name": "LineAmplitude",
-                    "Value": 0.05000000074505806,
+                    "Name": "Amplitude",
+                    "Value": 0.5,
                     "Minimum": 0.0,
-                    "Maximum": 0.25
+                    "Maximum": 1.0
                 },
                 {
                     "Type": "nap::ParameterFloat",
                     "mID": "LineShiftParam",
-                    "Name": "LineShift",
+                    "Name": "Shift",
                     "Value": 0.0,
+                    "Minimum": -1.0,
+                    "Maximum": 1.0
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LinePeakParam",
+                    "Name": "Peak",
+                    "Value": 1.0,
                     "Minimum": -2.0,
                     "Maximum": 2.0
                 }

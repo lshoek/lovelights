@@ -5,6 +5,7 @@
 
 #extension GL_GOOGLE_include_directive : enable
 #include "noise.glslinc"
+#include "utils.glslinc"
 
 layout(local_size_x_id = 0) in;
 
@@ -40,12 +41,13 @@ layout(std430) restrict readonly buffer InColors
 uniform UBO
 {
 	float elapsedTime;
-	float freq;
-	float posFreq;
-	float amp;
+	float wavelength;
+	float amplitude;
 	float offset;
 	float shift;
-};
+	float peak;
+	uint count;
+} ubo;
 
 // uint rgba8(vec4 col, float alpha)
 // {
@@ -58,19 +60,71 @@ uniform UBO
 // 	);
 // }
 
+const float PI2 = PI*2.0;
+const float HURST_EXP = 0.75;
+const uint OCTAVES = 4;
+
+
+vec3 gerstner(float x, out vec3 outTangent, float t, float steepness, float wavelength)
+{
+	float k = PI2/max(wavelength, 0.001); // magnitude
+	float w = k * x - t;
+	float f = fract(w/PI2)*PI2; // Stabilize w before feeding into trig funcs
+	float a = steepness/k;
+
+	// We do not require the tangent/deivative
+	// outTangent = vec3(1.0-steepness*sin(f), steepness * cos(f), 0.0);
+	return vec3(cos(f)*a, sin(f)*a, cos(f)*a);
+}
+
+
+float fbm(vec3 x, float H)
+{
+	float G = exp2(-H);
+	float f = 1.0;
+	float a = 1.0;
+	float t = 0.0;
+	for (uint i=0; i<OCTAVES; i++ )
+	{
+		t += a*simplexd(f*x).w;
+		f *= 2.0;
+		a *= G;
+	}
+	return t;
+}
+
+
 void main()
 {
 	const uint gid = gl_GlobalInvocationID.x;
+	const vec2 uv = vec2(inuvs[gid].x, inuvs[gid].y);
+	// float pos = gid/float(ubo.count)-0.5; // remaps to [-0.5, 0.5]
 
-	float offset = elapsedTime + offset;
-	vec2 shift = normalize(mix(vec2(1.0, 1.0), vec2(1.0, 0.0), posFreq)) * shift;
+	float t = ubo.elapsedTime + ubo.offset;
+	// vec2 uvx = uv * ubo.wavelength + ubo.shift + t;
+	// float v = simplexd(vec3(uvx, 1.0)).w * ubo.amplitude;
 
-	float pos = gid / 1024.0 - 0.5;
-	vec2 uv_sample = mix(vec2(inuvs[gid].x, inuvs[gid].y), vec2(pos, 0.0f), posFreq);
+	const float steepness = clamp(ubo.amplitude, 0.0, 1.0) * 1.0/float(OCTAVES);
+	const vec2 shift = { ubo.shift*ubo.wavelength*0.5, 0.0 };
+	vec2 uvs = (uv + shift) - 0.5;	// uv shifted
 
-	vec2 freq_shift = uv_sample * freq;
-	vec2 uv = freq_shift + shift + offset;
-	float v = simplexd(vec3(uv, 1.0)).w * amp;
+	vec3 w = vec3(0.0);		// wave offset
+	vec3 wt = vec3(0.0);	// wave tangent
 
-	outpositions[gid] = inpositions[gid] + (innormals[gid] * v);
+	// FBM
+	// Source: https://iquilezles.org/articles/fbm/
+	float G = exp2(-HURST_EXP);
+	float f = 1.0;
+	float a = 1.0;
+	for (uint i=0; i<OCTAVES; i++)
+	{
+		vec3 tangent = vec3(0.0);
+		w += a*gerstner(f*uvs.x, tangent, t, steepness, ubo.wavelength);
+		wt += tangent;
+		f *= 2.0;
+		a *= G;
+	}
+
+	const vec4 p = inpositions[gid];
+	outpositions[gid] = p + vec4(w, 1.0);
 }

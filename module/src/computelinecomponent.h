@@ -19,12 +19,12 @@ namespace nap
 	 */
 	struct NAPAPI NoiseProperties
 	{
-		ResourcePtr<ParameterFloat> mFrequency;				// Parameter that controls frequency
-		ResourcePtr<ParameterFloat> mLinePosFrequency;		// Parameter that controls line position frequency blend
-		ResourcePtr<ParameterFloat> mSpeed;					// Parameter that controls speed in seconds to move the waveform
+		ResourcePtr<ParameterFloat> mWavelength;			// Parameter that controls frequency
+		ResourcePtr<ParameterFloat> mClockSpeed;			// Parameter that controls speed in seconds to move the waveform
 		ResourcePtr<ParameterFloat> mOffset;				// Parameter that controls offset along the line
 		ResourcePtr<ParameterFloat> mAmplitude;				// Parameter that controls amplitude of the modulation
 		ResourcePtr<ParameterFloat> mShift;					// Parameter that controls shift
+		ResourcePtr<ParameterFloat> mPeak;					// Parameter that controls peak height
 		float mSmoothTime = 0.1f;							// Smooth time
 	};
 
@@ -86,11 +86,12 @@ namespace nap
 		uint mBufferIndex = 0;
 		bool mResetStorage = false;
 
-		math::SmoothOperator<double> mFreqSmoother			{ 1.0, 0.1 };
+		math::SmoothOperator<double> mWavelengthSmoother			{ 1.0, 0.1 };
 		math::SmoothOperator<double> mLinePosFreqSmoother	{ 1.0, 0.1 };
-		math::SmoothOperator<double> mAmpSmoother			{ 1.0, 0.1 };
+		math::SmoothOperator<double> mAmplitudeSmoother			{ 1.0, 0.1 };
 		math::SmoothOperator<double> mSpeedSmoother			{ 0.0, 0.1 };
 		math::SmoothOperator<double> mOffsetSmoother		{ 0.0, 0.1 };
 		math::SmoothOperator<double> mShiftSmoother			{ 0.0, 0.1 };
+		math::SmoothOperator<double> mPeakSmoother			{ 0.0, 0.1 };
 	};
 }
