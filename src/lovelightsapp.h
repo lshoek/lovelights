@@ -18,7 +18,7 @@
 #include <rendertarget.h>
 #include <entity.h>
 #include <app.h>
-#include <appgui.h>
+#include <parameterwindow.h>
 #include <appstate.h>
 
 namespace nap 
@@ -99,7 +99,7 @@ namespace nap
 		ObjectPtr<EntityInstance>	mRenderCameraEntity;				///< Pointer to the render camera entity
 		ObjectPtr<EntityInstance>	mPlaylistEntity;				    ///< Pointer to the playlist entity
 
-		std::vector<ObjectPtr<AppGUI>> mAppGUIs;						///< AppGUIs
+		ObjectPtr<ParameterWindow>	mParameterWindow;					///< AppGUIs
 
         nap::Slot<> mHotReloadSlot = { [&]() -> void { onReset(); } };
 

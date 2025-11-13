@@ -18,7 +18,10 @@ RTTI_BEGIN_STRUCT(nap::NoiseProperties)
 	RTTI_PROPERTY("Offset",				&nap::NoiseProperties::mOffset,				nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Amplitude",			&nap::NoiseProperties::mAmplitude,			nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Shift",				&nap::NoiseProperties::mShift,				nap::rtti::EPropertyMetaData::Required)
-	RTTI_PROPERTY("Peak",				&nap::NoiseProperties::mPeak,				nap::rtti::EPropertyMetaData::Required)
+	RTTI_PROPERTY("TimeShift",			&nap::NoiseProperties::mTimeShift,			nap::rtti::EPropertyMetaData::Required)
+	RTTI_PROPERTY("ColorOne",			&nap::NoiseProperties::mColorOne,			nap::rtti::EPropertyMetaData::Required)
+	RTTI_PROPERTY("ColorTwo",			&nap::NoiseProperties::mColorTwo,			nap::rtti::EPropertyMetaData::Required)
+	RTTI_PROPERTY("Opacity",			&nap::NoiseProperties::mOpacity,			nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("SmoothTime",			&nap::NoiseProperties::mSmoothTime,			nap::rtti::EPropertyMetaData::Default)
 RTTI_END_STRUCT
 
@@ -26,6 +29,7 @@ RTTI_BEGIN_CLASS(nap::ComputeLineComponent)
 	RTTI_PROPERTY("LineMesh",			&nap::ComputeLineComponent::mLineMesh,		nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Properties",			&nap::ComputeLineComponent::mProperties,	nap::rtti::EPropertyMetaData::Required | nap::rtti::EPropertyMetaData::Embedded)
 	RTTI_PROPERTY("ClockSpeed",			&nap::ComputeLineComponent::mClockSpeed,	nap::rtti::EPropertyMetaData::Default)
+	RTTI_PROPERTY("Readback",			&nap::ComputeLineComponent::mReadback,		nap::rtti::EPropertyMetaData::Default)
 	RTTI_PROPERTY("ResetStorage",		&nap::ComputeLineComponent::mResetStorage,	nap::rtti::EPropertyMetaData::Default)
 RTTI_END_CLASS
 
@@ -57,17 +61,19 @@ namespace nap
 		mProperties = resource->mProperties;
 		mClockSpeed = resource->mClockSpeed;
 		mLineMesh = resource->mLineMesh.get();
+		mReadback = resource->mReadback;
 		mResetStorage = resource->mResetStorage;
 
 		// Buffer bindings
-		createBufferBinding("InPositions", mLineMesh->getPositionBuffer(LineMesh::EBufferRank::Original), getMaterialInstance());
 		createBufferBinding("OutPositions", mLineMesh->getPositionBuffer(LineMesh::EBufferRank::Write), getMaterialInstance());
+		createBufferBinding("OutColors", mLineMesh->getColorBuffer(LineMesh::EBufferRank::Write), getMaterialInstance());
+		createBufferBinding("InPositions", mLineMesh->getPositionBuffer(LineMesh::EBufferRank::Original), getMaterialInstance());
 		createBufferBinding("InNormals", mLineMesh->getNormalBuffer(LineMesh::EBufferRank::Read), getMaterialInstance());
 		createBufferBinding("InUVs", mLineMesh->getUVBuffer(LineMesh::EBufferRank::Read), getMaterialInstance());
 		createBufferBinding("InColors", mLineMesh->getColorBuffer(LineMesh::EBufferRank::Read), getMaterialInstance());
 
 		// Set smooth timing values
-		for (auto* smoother : { &mAmplitudeSmoother, &mWavelengthSmoother, &mOffsetSmoother, &mSpeedSmoother, &mShiftSmoother, &mPeakSmoother })
+		for (auto* smoother : { &mAmplitudeSmoother, &mWavelengthSmoother, &mOffsetSmoother, &mSpeedSmoother, &mShiftSmoother, &mTimeShiftSmoother })
 			smoother->mSmoothTime = mProperties.mSmoothTime;
 
 		mAmplitudeSmoother.setValue(mProperties.mAmplitude->mValue);
@@ -75,7 +81,7 @@ namespace nap
 		mOffsetSmoother.setValue(mProperties.mOffset->mValue);
 		mSpeedSmoother.setValue(mProperties.mClockSpeed->mValue);
 		mShiftSmoother.setValue(mProperties.mShift->mValue);
-		mPeakSmoother.setValue(mProperties.mPeak->mValue);
+		mTimeShiftSmoother.setValue(mProperties.mTimeShift->mValue);
 
 		mRandomSeed =
 		{
@@ -85,6 +91,7 @@ namespace nap
 		};
 
 		setInvocations(resource->mLineMesh->getMeshInstance().getNumVertices());
+
 		return true;
 	}
 
@@ -100,7 +107,7 @@ namespace nap
 		mAmplitudeSmoother.update(mProperties.mAmplitude->mValue, deltaTime);
 		mOffsetSmoother.update(mProperties.mOffset->mValue, deltaTime);
 		mShiftSmoother.update(mProperties.mShift->mValue, deltaTime);
-		mPeakSmoother.update(mProperties.mPeak->mValue, deltaTime);
+		mTimeShiftSmoother.update(mProperties.mTimeShift->mValue, deltaTime);
 
 		// Update current time
 		mElapsedClockTime += (deltaTime * mSpeedSmoother.getValue() * mClockSpeed);
@@ -110,7 +117,10 @@ namespace nap
 		ubo->getOrCreateUniform<UniformFloatInstance>("amplitude")->setValue(mAmplitudeSmoother.getValue());
 		ubo->getOrCreateUniform<UniformFloatInstance>("offset")->setValue(mOffsetSmoother.getValue());
 		ubo->getOrCreateUniform<UniformFloatInstance>("shift")->setValue(mShiftSmoother.getValue());
-		ubo->getOrCreateUniform<UniformFloatInstance>("peak")->setValue(mPeakSmoother.getValue());
+		ubo->getOrCreateUniform<UniformFloatInstance>("timeshift")->setValue(mTimeShiftSmoother.getValue());
+		ubo->getOrCreateUniform<UniformVec4Instance>("colorOne")->setValue(mProperties.mColorOne->mValue.toVec4());
+		ubo->getOrCreateUniform<UniformVec4Instance>("colorTwo")->setValue(mProperties.mColorTwo->mValue.toVec4());
+		ubo->getOrCreateUniform<UniformFloatInstance>("alpha")->setValue(mProperties.mOpacity->mValue);
 		ubo->getOrCreateUniform<UniformUIntInstance>("count")->setValue(mLineMesh->getMeshInstance().getNumVertices());
 	}
 
@@ -129,8 +139,18 @@ namespace nap
 		binding = getMaterialInstance().getOrCreateBuffer<BufferBindingVec4Instance>("OutPositions");
 		binding->setBuffer(mLineMesh->getPositionBuffer(LineMesh::EBufferRank::Write));
 
+		binding = getMaterialInstance().getOrCreateBuffer<BufferBindingVec4Instance>("InColors");
+		binding->setBuffer(mLineMesh->getColorBuffer(LineMesh::EBufferRank::Read));
+
+		binding = getMaterialInstance().getOrCreateBuffer<BufferBindingVec4Instance>("OutColors");
+		binding->setBuffer(mLineMesh->getColorBuffer(LineMesh::EBufferRank::Write));
+
 		mLineMesh->swapPositionBuffer();
+		mLineMesh->swapColorBuffer();
 
 		ComputeComponentInstance::onCompute(commandBuffer, numInvocations);
+
+		if (mReadback)
+			mLineMesh->readback();
 	}
 }

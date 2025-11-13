@@ -14,8 +14,6 @@
 
 RTTI_BEGIN_CLASS(nap::RenderLineComponent)
 	RTTI_PROPERTY("MaterialInstance",	&nap::RenderLineComponent::mMaterialInstance,	nap::rtti::EPropertyMetaData::Default)
-	RTTI_PROPERTY("Color",				&nap::RenderLineComponent::mColor,				nap::rtti::EPropertyMetaData::Required)
-	RTTI_PROPERTY("Opacity",			&nap::RenderLineComponent::mOpacity,			nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("LineWidth",			&nap::RenderLineComponent::mLineWidth,			nap::rtti::EPropertyMetaData::Default)
 	RTTI_PROPERTY("PointSize",			&nap::RenderLineComponent::mPointSize,			nap::rtti::EPropertyMetaData::Default)
 	RTTI_PROPERTY("ComputeLine",		&nap::RenderLineComponent::mComputeLine,		nap::rtti::EPropertyMetaData::Required)
@@ -110,15 +108,6 @@ namespace nap
 		if (mModelMatUniform == nullptr || mViewMatUniform == nullptr || mProjectMatUniform == nullptr)
 			return false;
 
-		// Get all constant uniforms
-		mUBOStruct = mMaterialInstance.getOrCreateUniform(uniform::UBO);
-		if (!errorState.check(mUBOStruct != nullptr, "%s: Unable to find uniform struct: %s in shader: %s",
-			mID.c_str(), uniform::UBO, mMaterialInstance.getMaterial().getShader().getDisplayName().c_str()))
-			return false;
-
-		mColorUniform = getUniform<UniformVec3Instance>(uniform::color, *mUBOStruct, errorState);	assert(mColorUniform != nullptr);
-		mAlphaUniform = getUniform<UniformFloatInstance>(uniform::alpha, *mUBOStruct, errorState); assert(mAlphaUniform != nullptr);
-
 		// Create mesh / material combo that can be rendered to target
 		mRenderableMesh = mRenderService->createRenderableMesh(*mMesh, mMaterialInstance, errorState);
 		if (!mRenderableMesh.isValid())
@@ -128,19 +117,8 @@ namespace nap
 	}
 
 
-	void RenderLineComponentInstance::update(double deltaTime)
-	{
-		mColorUniform->setValue(mResource->mColor->mValue.toVec3());
-		mAlphaUniform->setValue(mResource->mOpacity->mValue);
-	}
-
-
 	void RenderLineComponentInstance::onDraw(IRenderTarget& renderTarget, VkCommandBuffer commandBuffer, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
 	{
-		// Skip rendering if opacity is zero
-		if (mResource->mOpacity->mValue <= math::epsilon<float>())
-			return;
-
 		// Get material to work with
 		if (!mRenderableMesh.isValid())
 		{

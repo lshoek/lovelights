@@ -55,6 +55,9 @@ namespace nap
 		// Stencil target (not required)
 		mStencilTarget = mResourceManager->findObject<RenderTarget>("StencilTarget");
 
+    	// Parameter window
+    	mParameterWindow = mResourceManager->findObject<ParameterWindow>("ParameterWindow");
+
 		// Get the scene that contains our entities and components
 		mScene = mResourceManager->findObject<Scene>("Scene");
 		if (!errorState.check(mScene != nullptr, "unable to find scene with name: %s", "Scene"))
@@ -67,8 +70,6 @@ namespace nap
 		mCompositeEntity 		= mScene->findEntity("CompositeEntity");
 		mRenderCameraEntity 	= mScene->findEntity("RenderCameraEntity");
         mPlaylistEntity         = mScene->findEntity("PlaylistEntity");
-
-		mAppGUIs = mResourceManager->getObjects<AppGUI>();
 
         // Connect hot reload slot
         mResourceManager->mPostResourcesLoadedSignal.connect(mHotReloadSlot);
@@ -252,10 +253,15 @@ namespace nap
         // tell GUI service what window to render to
         mGuiService->selectWindow(mControlWindow);
 
-		if (mShowGUI)
+		if (mShowGUI && mParameterWindow != nullptr)
 		{
-			for (auto& gui : mAppGUIs)
-				gui->draw(deltaTime);
+			ImGui::SetNextWindowPos(ImVec2(0, 0));
+			ImGui::SetNextWindowSize(ImVec2(mControlWindow->getWidthPixels(), mControlWindow->getHeightPixels()));
+			if (ImGui::Begin("Control", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar))
+			{
+				mParameterWindow->drawContent(deltaTime);
+				ImGui::End();
+			}
 		}
     }
 }

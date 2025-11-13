@@ -9,6 +9,7 @@
 #include <parameternumeric.h>
 #include <computecomponent.h>
 #include <linemesh.h>
+#include <parametercolor.h>
 
 namespace nap
 {
@@ -19,13 +20,16 @@ namespace nap
 	 */
 	struct NAPAPI NoiseProperties
 	{
-		ResourcePtr<ParameterFloat> mWavelength;			// Parameter that controls frequency
-		ResourcePtr<ParameterFloat> mClockSpeed;			// Parameter that controls speed in seconds to move the waveform
-		ResourcePtr<ParameterFloat> mOffset;				// Parameter that controls offset along the line
-		ResourcePtr<ParameterFloat> mAmplitude;				// Parameter that controls amplitude of the modulation
-		ResourcePtr<ParameterFloat> mShift;					// Parameter that controls shift
-		ResourcePtr<ParameterFloat> mPeak;					// Parameter that controls peak height
-		float mSmoothTime = 0.1f;							// Smooth time
+		ResourcePtr<ParameterFloat> mWavelength;			//< Parameter that controls frequency
+		ResourcePtr<ParameterFloat> mClockSpeed;			//< Parameter that controls speed in seconds to move the waveform
+		ResourcePtr<ParameterFloat> mOffset;				//< Parameter that controls offset along the line
+		ResourcePtr<ParameterFloat> mAmplitude;				//< Parameter that controls amplitude of the modulation
+		ResourcePtr<ParameterFloat> mShift;					//< Parameter that controls shift
+		ResourcePtr<ParameterFloat> mTimeShift;					//< Parameter that controls peak height
+		ResourcePtr<ParameterRGBAColorFloat> mColorOne;		//< Property: 'ColorOne' line primary color
+		ResourcePtr<ParameterRGBAColorFloat> mColorTwo;		//< Property: 'ColorTwo' line secondary color
+		ResourcePtr<ParameterFloat> mOpacity;				//< Property: 'Opacity' line alpha
+		float mSmoothTime = 0.1f;							//< Smooth time
 	};
 
 
@@ -40,6 +44,7 @@ namespace nap
 		ResourcePtr<LineMesh> mLineMesh;				//< Property 'LineMesh':
 		NoiseProperties mProperties;					//< Property 'Properties': all modulation settings
 		double mClockSpeed = 1.0;						//< Property 'ClockSpeed': speed multiplier
+		bool mReadback = false;							//< Property 'Readback' Whether to readback to host
 		bool mResetStorage = false;						//< Property 'ResetStorage': resets storage buffer to original
 	};
 
@@ -84,14 +89,15 @@ namespace nap
 		double mElapsedClockTime = 0.0;
 		glm::vec3 mRandomSeed;
 		uint mBufferIndex = 0;
+		bool mReadback = false;
 		bool mResetStorage = false;
 
-		math::SmoothOperator<double> mWavelengthSmoother			{ 1.0, 0.1 };
+		math::SmoothOperator<double> mWavelengthSmoother	{ 1.0, 0.1 };
 		math::SmoothOperator<double> mLinePosFreqSmoother	{ 1.0, 0.1 };
-		math::SmoothOperator<double> mAmplitudeSmoother			{ 1.0, 0.1 };
+		math::SmoothOperator<double> mAmplitudeSmoother		{ 1.0, 0.1 };
 		math::SmoothOperator<double> mSpeedSmoother			{ 0.0, 0.1 };
 		math::SmoothOperator<double> mOffsetSmoother		{ 0.0, 0.1 };
 		math::SmoothOperator<double> mShiftSmoother			{ 0.0, 0.1 };
-		math::SmoothOperator<double> mPeakSmoother			{ 0.0, 0.1 };
+		math::SmoothOperator<double> mTimeShiftSmoother			{ 0.0, 0.1 };
 	};
 }

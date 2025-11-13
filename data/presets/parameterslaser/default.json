@@ -1,0 +1,93 @@
+{
+    "Objects": [
+        {
+            "Type": "nap::ParameterGroup",
+            "mID": "ParametersLaser",
+            "Parameters": [
+                {
+                    "Type": "nap::ParameterRGBAColorFloat",
+                    "mID": "LineColorOneParam",
+                    "Name": "LineColorOne",
+                    "Value": {
+                        "Values": [
+                            0.9843137264251709,
+                            0.12760882079601288,
+                            0.038600534200668335,
+                            1.0
+                        ]
+                    }
+                },
+                {
+                    "Type": "nap::ParameterRGBAColorFloat",
+                    "mID": "LineColorTwoParam",
+                    "Name": "LineColorTwo",
+                    "Value": {
+                        "Values": [
+                            0.9999899864196777,
+                            0.9999929666519165,
+                            1.0,
+                            1.0
+                        ]
+                    }
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LineOpacityParam",
+                    "Name": "Opacity",
+                    "Value": 1.0,
+                    "Minimum": 0.0,
+                    "Maximum": 1.0
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LineWavelengthParam",
+                    "Name": "Wavelength",
+                    "Value": 1.0,
+                    "Minimum": 0.0,
+                    "Maximum": 1.0
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LineClockSpeedParam",
+                    "Name": "ClockSpeed",
+                    "Value": 1.0,
+                    "Minimum": 0.0,
+                    "Maximum": 4.0
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LineOffsetParam",
+                    "Name": "Offset",
+                    "Value": 0.0,
+                    "Minimum": 0.0,
+                    "Maximum": 1.0
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LineAmplitudeParam",
+                    "Name": "Amplitude",
+                    "Value": 0.5,
+                    "Minimum": 0.0,
+                    "Maximum": 1.0
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LineShiftParam",
+                    "Name": "Shift",
+                    "Value": 0.0,
+                    "Minimum": -1.0,
+                    "Maximum": 1.0
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LineTimeShiftParam",
+                    "Name": "Peak",
+                    "Value": 1.0,
+                    "Minimum": -2.0,
+                    "Maximum": 2.0
+                }
+            ],
+            "Groups": []
+        }
+    ]
+}

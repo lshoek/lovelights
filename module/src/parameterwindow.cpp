@@ -21,11 +21,14 @@ namespace nap
 	ParameterWindow::ParameterWindow(AppGUIService& service) :
 		AppGUIWindow(service),
 		mGuiService(service.getCore().getService<IMGuiService>())
-	{}
+	{ }
 
 
 	void ParameterWindow::drawContent(double deltaTime)
 	{
+		ImGui::Text("%.02ffps | %.02fms", mGuiService->getCore().getFramerate(), deltaTime * 1000.0);
+		ImGui::Dummy({ 0.0f, 2.0f * mGuiService->getScale() });
+
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar(mID.c_str(), tab_bar_flags))
 		{

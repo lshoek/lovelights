@@ -18,6 +18,11 @@ layout(std430) restrict writeonly buffer OutPositions
 	vec4 outpositions[];
 };
 
+layout(std430) restrict writeonly buffer OutColors
+{
+	vec4 outcolors[];
+};
+
 layout(std430) restrict readonly buffer InPositions
 {
 	vec4 inpositions[];
@@ -45,7 +50,10 @@ uniform UBO
 	float amplitude;
 	float offset;
 	float shift;
-	float peak;
+	float timeshift;
+	float alpha;
+	vec4 colorOne;
+	vec4 colorTwo;
 	uint count;
 } ubo;
 
@@ -61,16 +69,16 @@ uniform UBO
 // }
 
 const float PI2 = PI*2.0;
-const float HURST_EXP = 0.75;
-const uint OCTAVES = 4;
+const float HURST_EXP = 0.45; // [0,1] from rough to smooth
+const uint OCTAVES = 6;
 
 
-vec3 gerstner(float x, out vec3 outTangent, float t, float steepness, float wavelength)
+vec3 gerstner(float x, float t, float steep, float wavelen)
 {
-	float k = PI2/max(wavelength, 0.001); // magnitude
+	float k = PI2/max(wavelen, 0.001); // magnitude
 	float w = k * x - t;
 	float f = fract(w/PI2)*PI2; // Stabilize w before feeding into trig funcs
-	float a = steepness/k;
+	float a = steep/k;
 
 	// We do not require the tangent/deivative
 	// outTangent = vec3(1.0-steepness*sin(f), steepness * cos(f), 0.0);
@@ -78,19 +86,23 @@ vec3 gerstner(float x, out vec3 outTangent, float t, float steepness, float wave
 }
 
 
-float fbm(vec3 x, float H)
+vec3 wave(float x, float t, float steep, float wavelen, float timeshift)
 {
-	float G = exp2(-H);
+	const float s = steep*(1.0/float(OCTAVES));
+
+	// https://iquilezles.org/articles/fbm/
+	const float G = exp2(-HURST_EXP);
 	float f = 1.0;
 	float a = 1.0;
-	float t = 0.0;
-	for (uint i=0; i<OCTAVES; i++ )
+	vec3 w = vec3(0.0);
+	for (uint i=0; i<OCTAVES; i++)
 	{
-		t += a*simplexd(f*x).w;
+		w += a*gerstner(f*x, t, s, wavelen);
 		f *= 2.0;
 		a *= G;
+		t *= timeshift;
 	}
-	return t;
+	return w;
 }
 
 
@@ -98,33 +110,21 @@ void main()
 {
 	const uint gid = gl_GlobalInvocationID.x;
 	const vec2 uv = vec2(inuvs[gid].x, inuvs[gid].y);
-	// float pos = gid/float(ubo.count)-0.5; // remaps to [-0.5, 0.5]
+	const float t = ubo.elapsedTime + ubo.offset;
 
-	float t = ubo.elapsedTime + ubo.offset;
-	// vec2 uvx = uv * ubo.wavelength + ubo.shift + t;
-	// float v = simplexd(vec3(uvx, 1.0)).w * ubo.amplitude;
-
-	const float steepness = clamp(ubo.amplitude, 0.0, 1.0) * 1.0/float(OCTAVES);
+	const float steepness = clamp(ubo.amplitude, 0.0, 1.0);
 	const vec2 shift = { ubo.shift*ubo.wavelength*0.5, 0.0 };
-	vec2 uvs = (uv + shift) - 0.5;	// uv shifted
 
-	vec3 w = vec3(0.0);		// wave offset
-	vec3 wt = vec3(0.0);	// wave tangent
-
-	// FBM
-	// Source: https://iquilezles.org/articles/fbm/
-	float G = exp2(-HURST_EXP);
-	float f = 1.0;
-	float a = 1.0;
-	for (uint i=0; i<OCTAVES; i++)
-	{
-		vec3 tangent = vec3(0.0);
-		w += a*gerstner(f*uvs.x, tangent, t, steepness, ubo.wavelength);
-		wt += tangent;
-		f *= 2.0;
-		a *= G;
-	}
-
+	// uv shifted
+	const vec2 uvs = (uv + shift) - 0.5;
+	const vec3 w = wave(uvs.x, t, steepness, ubo.wavelength, ubo.timeshift);
 	const vec4 p = inpositions[gid];
 	outpositions[gid] = p + vec4(w, 1.0);
+
+	// Still figuring out how to make this look good on the laser
+	// const float pct = clamp((w.y*20.0+ubo.amplitude)/max(ubo.amplitude*2.0, 0.001), 0.0, 1.0);
+	// const float pct = pow(1.0-abs(clamp(uv.x*2.0-0.5, 0.0, 1.0)), 2.0);
+	// const vec4 col = mix(ubo.colorOne, ubo.colorTwo, pct);
+	const vec4 col = ubo.colorOne;
+	outcolors[gid] = vec4(col.rgb, pow(ubo.alpha, 3.0));
 }

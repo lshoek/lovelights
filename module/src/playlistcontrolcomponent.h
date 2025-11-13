@@ -22,7 +22,6 @@ namespace nap
         DECLARE_COMPONENT(PlaylistControlComponent, PlaylistControlComponentInstance)
         
     public:
-
         void getDependentComponents(std::vector<rtti::TypeInfo> &components) const override;
 
         struct PresetGroup
@@ -30,6 +29,7 @@ namespace nap
             ResourcePtr<ParameterGroup> mParameterGroup = nullptr;		// The parametergroup that contains the preset
             ResourcePtr<ParameterBlendComponent> mBlender = nullptr;	// The parameter blender that contains the parameter blend group
             std::string mPreset = "";								    // name of the json preset file
+            bool mImmediate = false;
         };
 
         // Metadata about one preset in the sequence
@@ -37,15 +37,14 @@ namespace nap
         {
             RTTI_ENABLE(Resource)
         public:
-            std::vector<PresetGroup> mPresets; // group of presets to blend
-            float mAverageDuration = 5.f;	// average duration of the preset in the sequence in seconds
-            float mDurationDeviation = 0.f;	// random deviation of the preset duration in seconds
-            float mTransitionTime = 3.f;	// duration of the video fade into this preset in seconds
-
-            bool init(utility::ErrorState& errorState) override;
+            std::vector<PresetGroup> mPresets;          // group of presets to blend
+            float mAverageDuration = 5.f;               // average duration of the preset in the sequence in seconds
+            float mDurationDeviation = 0.f;             // random deviation of the preset duration in seconds
+            float mTransitionTime = 3.f;                // duration of the video fade into this preset in seconds
         };
 
         std::vector<ResourcePtr<Item>> mItems;			// List of presets in the sequence accompanied by meta data
+        ResourcePtr<Item> mIdleItem;                    //
 		bool mEnable;									// True to enable the preset cycle
         bool mRandomizePlaylist = false;				// Indicates whether the order of the cycle of presets will be shuffled
         bool mVerbose = true;							// Whether to log playlist changes
@@ -61,11 +60,12 @@ namespace nap
     public:
         struct ItemPresetGroup
         {
-            ItemPresetGroup(int index, ParameterGroup* group, ParameterBlendComponentInstance* blender, const std::string& preset);
+            ItemPresetGroup(int index, ParameterGroup* group, ParameterBlendComponentInstance* blender, const std::string& preset, bool immediate);
 
             ParameterGroup* mParameterGroup = nullptr;
-            ParameterBlendComponentInstance* mBlender;
+            ParameterBlendComponentInstance* mBlender = nullptr;
             std::string mPreset = "";
+            bool mImmediate = false;
             int mPresetIndex = 0;
         };
 
@@ -97,6 +97,11 @@ namespace nap
          */
         void setItem(int index, bool immediate = false);
 
+        /**
+         * @return the current playlist item
+         */
+        const Item& getCurrentItem() const				{ return *mCurrentPlaylistItem; }
+
 		/**
 		 * @return whether preset cycling is enabled
 		 */
@@ -113,22 +118,33 @@ namespace nap
          * @return current playlist index
          */
         int getCurrentPlaylistIndex() const            { return mCurrentPlaylistIndex; }
+
     private:
+        // Checks validity of the preset index
+        bool isIndexValid(int index) const             { return (index >= 0 && index < mPlaylist.size()) || index == IDLE_ITEM_INDEX; }
+
+        // Returns playlist item
+        Item* getItem(int index, bool permuted = false);
+
+        // Selects the preset item, for internal use
         void setItemInternal(int index, bool randomize, bool immediate = false);
 
         // Selects the next preset in the sequence
         void nextItem();
 
-        // Permutes a list of presets. Helper method.
-        void permute(std::vector<PlaylistControlComponentInstance::Item*>& list);
-
 		PlaylistControlComponent* mResource = nullptr;
 
         std::vector<Item> mPlaylist;
         std::vector<Item*> mPermutedPlaylist;
-        int mCurrentPlaylistIndex = -1;
-        float mCurrentPlaylistItemDuration = 0;
-        float mCurrentPlaylistItemElapsedTime = 0;
+        Item mIdleItem;
+
+        static constexpr int IDLE_ITEM_INDEX = -1;
+
+        int mCurrentPlaylistIndex = IDLE_ITEM_INDEX;
+        int mCachedPlaylistIndex = IDLE_ITEM_INDEX;
+
+        float mCurrentPlaylistItemDuration = 0.0f;
+        float mCurrentPlaylistItemElapsedTime = 0.0f;
         Item* mCurrentPlaylistItem;
 
         bool mRandomizePlaylist = false;

@@ -1,35 +1,6 @@
 {
     "Objects": [
         {
-            "Type": "nap::AppGUI",
-            "mID": "AppGUI",
-            "Widget Groups": [
-                "AppGUIWindowGroup"
-            ]
-        },
-        {
-            "Type": "nap::AppGUIWindowGroup",
-            "mID": "AppGUIWindowGroup",
-            "Items": [
-                {
-                    "Type": "nap::ParameterWindow",
-                    "mID": "ParameterWindow",
-                    "Name": "Parameters",
-                    "ParameterGUIs": [
-                        "ParameterGUI",
-                        "EtcParameterGUI"
-                    ]
-                },
-                {
-                    "Type": "nap::InfoWindow",
-                    "mID": "InfoWindow",
-                    "Name": "Performance",
-                    "Notes": ""
-                }
-            ],
-            "Name": "Menu"
-        },
-        {
             "Type": "nap::AppState",
             "mID": "AppState",
             "CapFramerate": false,
@@ -76,7 +47,7 @@
                         "TopPlane": 1.0,
                         "BottomPlane": -1.0,
                         "NearClippingPlane": 0.10000000149011612,
-                        "FarClippingPlane": 100.0,
+                        "FarClippingPlane": 10.0,
                         "ClipRect": {
                             "Min": {
                                 "x": 0.0,
@@ -218,6 +189,12 @@
                                 "mID": "OutPositions",
                                 "Name": "OutPositions",
                                 "Buffer": "VertexBufferVec4Dummy"
+                            },
+                            {
+                                "Type": "nap::BufferBindingVec4",
+                                "mID": "OutColors",
+                                "Name": "OutColors",
+                                "Buffer": "VertexBufferVec4Dummy"
                             }
                         ],
                         "Constants": [],
@@ -231,10 +208,14 @@
                         "Offset": "LineOffsetParam",
                         "Amplitude": "LineAmplitudeParam",
                         "Shift": "LineShiftParam",
-                        "Peak": "LinePeakParam",
+                        "TimeShift": "LineTimeShiftParam",
+                        "ColorOne": "LineColorOneParam",
+                        "ColorTwo": "LineColorTwoParam",
+                        "Opacity": "LineOpacityParam",
                         "SmoothTime": 0.10000000149011612
                     },
                     "ClockSpeed": 1.0,
+                    "Readback": true,
                     "ResetStorage": true
                 }
             ],
@@ -255,12 +236,12 @@
                             "x": 1.0,
                             "y": 1.0
                         },
-                        "FlipVertical": false,
+                        "FlipVertical": true,
                         "FlipHorizontal": false,
                         "Framerate": 60,
                         "GapThreshold": 0.009999999776482582
                     },
-                    "Enable": false
+                    "Enable": true
                 },
                 {
                     "Type": "nap::TransformComponent",
@@ -328,11 +309,17 @@
                         "BlendMode": "NotSet",
                         "DepthMode": "NotSet"
                     },
-                    "Color": "LineColorOneParam",
-                    "Opacity": "LineMasterParam",
                     "LineWidth": 4.0,
                     "PointSize": 32.0,
                     "ComputeLine": "../../ComputeEntity/ComputeLine"
+                },
+                {
+                    "Type": "nap::UpdateTransformComponent",
+                    "mID": "UpdateTransformComponent",
+                    "Position": "",
+                    "Scale": "LineScaleParam",
+                    "Angle": "",
+                    "Enable": true
                 }
             ],
             "Children": []
@@ -342,163 +329,90 @@
             "mID": "PlaylistEntity",
             "Components": [
                 {
-                    "Type": "nap::PlaylistControlComponent",
-                    "mID": "ControlPlaylist",
-                    "Items": [
-                        {
-                            "Type": "nap::PlaylistControlComponent::Item",
-                            "mID": "Item_1",
-                            "Groups": [
-                                {
-                                    "Preset": "presets/parameterslaser/1.simple.json",
-                                    "ParameterGroup": "ParametersLaser",
-                                    "Blender": "ParameterBlender"
-                                }
-                            ],
-                            "AverageDuration": 30.0,
-                            "DurationDeviation": 1.0,
-                            "TransitionTime": 2.0
-                        },
-                        {
-                            "Type": "nap::PlaylistControlComponent::Item",
-                            "mID": "Item_2",
-                            "Groups": [
-                                {
-                                    "Preset": "presets/parameterslaser/2.bounce.json",
-                                    "ParameterGroup": "ParametersLaser",
-                                    "Blender": "ParameterBlender"
-                                }
-                            ],
-                            "AverageDuration": 30.0,
-                            "DurationDeviation": 1.0,
-                            "TransitionTime": 2.0
-                        },
-                        {
-                            "Type": "nap::PlaylistControlComponent::Item",
-                            "mID": "Item_3",
-                            "Groups": [
-                                {
-                                    "Preset": "presets/parameterslaser/3.fast.json",
-                                    "ParameterGroup": "ParametersLaser",
-                                    "Blender": "ParameterBlender"
-                                }
-                            ],
-                            "AverageDuration": 30.0,
-                            "DurationDeviation": 1.0,
-                            "TransitionTime": 2.0
-                        },
-                        {
-                            "Type": "nap::PlaylistControlComponent::Item",
-                            "mID": "Item_4",
-                            "Groups": [
-                                {
-                                    "Preset": "presets/parameterslaser/4.crawl.json",
-                                    "ParameterGroup": "ParametersLaser",
-                                    "Blender": "ParameterBlender"
-                                }
-                            ],
-                            "AverageDuration": 30.0,
-                            "DurationDeviation": 1.0,
-                            "TransitionTime": 2.0
-                        },
-                        {
-                            "Type": "nap::PlaylistControlComponent::Item",
-                            "mID": "Item_5",
-                            "Groups": [
-                                {
-                                    "Preset": "presets/parameterslaser/5.widecrawl.json",
-                                    "ParameterGroup": "ParametersLaser",
-                                    "Blender": "ParameterBlender"
-                                }
-                            ],
-                            "AverageDuration": 30.0,
-                            "DurationDeviation": 1.0,
-                            "TransitionTime": 2.0
-                        },
-                        {
-                            "Type": "nap::PlaylistControlComponent::Item",
-                            "mID": "Item_6",
-                            "Groups": [
-                                {
-                                    "Preset": "presets/parameterslaser/6.cronk.json",
-                                    "ParameterGroup": "ParametersLaser",
-                                    "Blender": "ParameterBlender"
-                                }
-                            ],
-                            "AverageDuration": 30.0,
-                            "DurationDeviation": 1.0,
-                            "TransitionTime": 2.0
-                        },
-                        {
-                            "Type": "nap::PlaylistControlComponent::Item",
-                            "mID": "Item_7",
-                            "Groups": [
-                                {
-                                    "Preset": "presets/parameterslaser/7.croonk.json",
-                                    "ParameterGroup": "ParametersLaser",
-                                    "Blender": "ParameterBlender"
-                                }
-                            ],
-                            "AverageDuration": 30.0,
-                            "DurationDeviation": 1.0,
-                            "TransitionTime": 2.0
-                        },
-                        {
-                            "Type": "nap::PlaylistControlComponent::Item",
-                            "mID": "Item_8",
-                            "Groups": [
-                                {
-                                    "Preset": "presets/parameterslaser/8.red.json",
-                                    "ParameterGroup": "ParametersLaser",
-                                    "Blender": "ParameterBlender"
-                                }
-                            ],
-                            "AverageDuration": 30.0,
-                            "DurationDeviation": 1.0,
-                            "TransitionTime": 2.0
-                        },
-                        {
-                            "Type": "nap::PlaylistControlComponent::Item",
-                            "mID": "Item_9",
-                            "Groups": [
-                                {
-                                    "Preset": "presets/parameterslaser/9.sudden.json",
-                                    "ParameterGroup": "ParametersLaser",
-                                    "Blender": "ParameterBlender"
-                                }
-                            ],
-                            "AverageDuration": 30.0,
-                            "DurationDeviation": 1.0,
-                            "TransitionTime": 2.0
-                        },
-                        {
-                            "Type": "nap::PlaylistControlComponent::Item",
-                            "mID": "Item_10",
-                            "Groups": [
-                                {
-                                    "Preset": "presets/parameterslaser/10.gentle.json",
-                                    "ParameterGroup": "ParametersLaser",
-                                    "Blender": "ParameterBlender"
-                                }
-                            ],
-                            "AverageDuration": 30.0,
-                            "DurationDeviation": 1.0,
-                            "TransitionTime": 2.0
-                        }
-                    ],
-                    "RandomizePlaylist": false,
-                    "Enable": false,
-                    "Verbose": true
+                    "Type": "nap::ParameterBlendComponent",
+                    "mID": "ParametersTransformBlender",
+                    "EnableBlending": true,
+                    "BlendGroup": "ParametersTransformBlendGroup",
+                    "PresetIndex": "TransformPresetIndex",
+                    "PresetBlendTime": "TransformPresetBlendTime",
+                    "BlendOnInit": false,
+                    "IgnoreNonBlendable": true
                 },
                 {
                     "Type": "nap::ParameterBlendComponent",
-                    "mID": "ParameterBlender",
+                    "mID": "ParametersLaserBlender",
                     "EnableBlending": true,
-                    "BlendGroup": "ParameterBlendGroup",
-                    "PresetIndex": "PresetIndexParam",
-                    "PresetBlendTime": "PresetBlendTimeParam",
-                    "BlendOnInit": false,
+                    "BlendGroup": "ParametersLaserBlendGroup",
+                    "PresetIndex": "LaserPresetIndex",
+                    "PresetBlendTime": "LaserPresetBlendTime",
+                    "BlendOnInit": true,
                     "IgnoreNonBlendable": true
+                },
+                {
+                    "Type": "nap::PlaylistControlComponent",
+                    "mID": "Playlist",
+                    "Items": [
+                        {
+                            "Type": "nap::PlaylistControlComponent::Item",
+                            "mID": "Default",
+                            "Groups": [
+                                {
+                                    "Preset": "presets/parameterstransform/wake.json",
+                                    "ParameterGroup": "ParametersTransform",
+                                    "Blender": "ParametersTransformBlender",
+                                    "Immediate": false
+                                },
+                                {
+                                    "Preset": "presets/parameterslaser/default.json",
+                                    "ParameterGroup": "ParametersLaser",
+                                    "Blender": "ParametersLaserBlender",
+                                    "Immediate": true
+                                }
+                            ],
+                            "AverageDuration": 4.0,
+                            "DurationDeviation": 0.0,
+                            "TransitionTime": 2.0
+                        },
+                        {
+                            "Type": "nap::PlaylistControlComponent::Item",
+                            "mID": "Ocean",
+                            "Groups": [
+                                {
+                                    "Preset": "presets/parameterstransform/wake.json",
+                                    "ParameterGroup": "ParametersTransform",
+                                    "Blender": "ParametersTransformBlender",
+                                    "Immediate": false
+                                },
+                                {
+                                    "Preset": "presets/parameterslaser/ocean.json",
+                                    "ParameterGroup": "ParametersLaser",
+                                    "Blender": "ParametersLaserBlender",
+                                    "Immediate": true
+                                }
+                            ],
+                            "AverageDuration": 9.0,
+                            "DurationDeviation": 0.0,
+                            "TransitionTime": 2.0
+                        }
+                    ],
+                    "IdleItem": {
+                        "Type": "nap::PlaylistControlComponent::Item",
+                        "mID": "Idle",
+                        "Groups": [
+                            {
+                                "Preset": "presets/parameterstransform/sleep.json",
+                                "ParameterGroup": "ParametersTransform",
+                                "Blender": "ParametersTransformBlender",
+                                "Immediate": false
+                            }
+                        ],
+                        "AverageDuration": 4.0,
+                        "DurationDeviation": 0.0,
+                        "TransitionTime": 2.0
+                    },
+                    "RandomizePlaylist": false,
+                    "Enable": true,
+                    "Verbose": true
                 }
             ],
             "Children": []
@@ -819,94 +733,31 @@
             "Count": 1024
         },
         {
-            "Type": "nap::ParameterBlendGroup",
-            "mID": "ParameterBlendGroup",
-            "Parameters": [],
-            "RootGroup": "ParametersLaser",
-            "BlendAll": true
-        },
-        {
-            "Type": "nap::ParameterFloat",
-            "mID": "PresetBlendTimeParam",
-            "Name": "PresetBlendTime",
-            "Value": 10.0,
-            "Minimum": 0.0,
-            "Maximum": 1.0
-        },
-        {
-            "Type": "nap::ParameterGUI",
-            "mID": "EtcParameterGUI",
-            "Serializable": true,
-            "Group": "ParametersEtc"
-        },
-        {
-            "Type": "nap::ParameterGUI",
-            "mID": "ParameterGUI",
-            "Serializable": true,
-            "Group": "ParametersLaser"
-        },
-        {
-            "Type": "nap::ParameterGroup",
-            "mID": "ParametersEtc",
-            "Parameters": [
-                {
-                    "Type": "nap::ParameterFloat",
-                    "mID": "TogglePlaylistControlParam",
-                    "Name": "TogglePlaylistControl",
-                    "Value": 1.0,
-                    "Minimum": 0.0,
-                    "Maximum": 1.0
-                },
-                {
-                    "Type": "nap::ParameterFloat",
-                    "mID": "LineMasterParam",
-                    "Name": "LineMaster",
-                    "Value": 1.0,
-                    "Minimum": 0.0,
-                    "Maximum": 1.0
-                }
-            ],
-            "Groups": []
-        },
-        {
-            "Type": "nap::ParameterGroup",
-            "mID": "ParametersHidden",
-            "Parameters": [
-                {
-                    "Type": "nap::ParameterFloat",
-                    "mID": "BlendSpeedParam",
-                    "Name": "BlendSpeed",
-                    "Value": 0.10000000149011612,
-                    "Minimum": 0.0,
-                    "Maximum": 1.0
-                }
-            ],
-            "Groups": []
-        },
-        {
             "Type": "nap::ParameterGroup",
             "mID": "ParametersLaser",
             "Parameters": [
                 {
-                    "Type": "nap::ParameterRGBColorFloat",
+                    "Type": "nap::ParameterRGBAColorFloat",
                     "mID": "LineColorOneParam",
                     "Name": "LineColorOne",
                     "Value": {
                         "Values": [
                             0.0,
-                            0.03921568766236305,
+                            0.0,
+                            0.0,
                             1.0
                         ]
                     }
                 },
                 {
-                    "Type": "nap::ParameterRGBColorFloat",
+                    "Type": "nap::ParameterRGBAColorFloat",
                     "mID": "LineColorTwoParam",
                     "Name": "LineColorTwo",
                     "Value": {
                         "Values": [
-                            0.0,
-                            0.03921568766236305,
+                            1.0,
+                            1.0,
+                            1.0,
                             1.0
                         ]
                     }
@@ -953,8 +804,8 @@
                 },
                 {
                     "Type": "nap::ParameterFloat",
-                    "mID": "LinePeakParam",
-                    "Name": "Peak",
+                    "mID": "LineTimeShiftParam",
+                    "Name": "TimeShift",
                     "Value": 1.0,
                     "Minimum": -2.0,
                     "Maximum": 2.0
@@ -963,12 +814,41 @@
             "Groups": []
         },
         {
-            "Type": "nap::ParameterInt",
-            "mID": "PresetIndexParam",
-            "Name": "PresetIndex",
-            "Value": 0,
-            "Minimum": 0,
-            "Maximum": 1
+            "Type": "nap::ParameterGroup",
+            "mID": "ParametersTransform",
+            "Parameters": [
+                {
+                    "Type": "nap::ParameterVec3",
+                    "mID": "LineScaleParam",
+                    "Name": "Scale",
+                    "Value": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "Clamp": true,
+                    "Minimum": 0.0,
+                    "Maximum": 2.0
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LineOpacityParam",
+                    "Name": "Opacity",
+                    "Value": 1.0,
+                    "Minimum": 0.0,
+                    "Maximum": 1.0
+                }
+            ],
+            "Groups": []
+        },
+        {
+            "Type": "nap::ParameterWindow",
+            "mID": "ParameterWindow",
+            "Name": "Parameters",
+            "ParameterGUIs": [
+                "ParametersLaserGUI",
+                "ParametersTransformGUI"
+            ]
         },
         {
             "Type": "nap::RenderTagGroup",
@@ -1087,6 +967,71 @@
             "Clear": true,
             "RestoreSize": true,
             "RestorePosition": true
+        },
+        {
+            "Type": "nap::ResourceGroup",
+            "mID": "Blenders",
+            "Members": [
+                {
+                    "Type": "nap::ParameterBlendGroup",
+                    "mID": "ParametersLaserBlendGroup",
+                    "Parameters": [],
+                    "RootGroup": "ParametersLaser",
+                    "BlendAll": true
+                },
+                {
+                    "Type": "nap::ParameterGUI",
+                    "mID": "ParametersLaserGUI",
+                    "Serializable": true,
+                    "Group": "ParametersLaser"
+                },
+                {
+                    "Type": "nap::ParameterBlendGroup",
+                    "mID": "ParametersTransformBlendGroup",
+                    "Parameters": [],
+                    "RootGroup": "ParametersTransform",
+                    "BlendAll": true
+                },
+                {
+                    "Type": "nap::ParameterGUI",
+                    "mID": "ParametersTransformGUI",
+                    "Serializable": true,
+                    "Group": "ParametersTransform"
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "TransformPresetBlendTime",
+                    "Name": "PresetBlendTime",
+                    "Value": 3.0,
+                    "Minimum": 0.0,
+                    "Maximum": 30.0
+                },
+                {
+                    "Type": "nap::ParameterInt",
+                    "mID": "TransformPresetIndex",
+                    "Name": "PresetIndex",
+                    "Value": 0,
+                    "Minimum": 0,
+                    "Maximum": 1
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LaserPresetBlendTime",
+                    "Name": "PresetBlendTime",
+                    "Value": 3.0,
+                    "Minimum": 0.0,
+                    "Maximum": 30.0
+                },
+                {
+                    "Type": "nap::ParameterInt",
+                    "mID": "LaserPresetIndex",
+                    "Name": "PresetIndex",
+                    "Value": 0,
+                    "Minimum": 0,
+                    "Maximum": 1
+                }
+            ],
+            "Children": []
         },
         {
             "Type": "nap::ResourceGroup",

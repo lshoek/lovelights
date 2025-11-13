@@ -33,9 +33,6 @@ void main(void)
 	// Calculate position
     gl_Position = mvp.projectionMatrix * mvp.viewMatrix * mvp.modelMatrix * in_Position;
 
-	// Pass uvs 
-	// pass_Uvs = in_UV0.xyz;
-
 	// Pass color
 	pass_Color = in_Color0;
 }

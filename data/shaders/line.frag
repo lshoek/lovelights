@@ -4,21 +4,10 @@
 
 #version 330
 
-// input  
-// in vec3 pass_Uvs;
 in vec4 pass_Color;
-
-// output
 out vec4 out_Color;
-
-uniform UBO
-{
-	vec3 color;
-	float alpha;
-} ubo;
 
 void main() 
 {
-	vec3 color = pass_Color.rgb * pass_Color.a;
-	out_Color = vec4(color * ubo.color, ubo.alpha);
+	out_Color = pass_Color;
 }

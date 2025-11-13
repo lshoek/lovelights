@@ -19,14 +19,14 @@ namespace nap
     public:
 		ParameterWindow(AppGUIService& service);
 
-		std::vector<ResourcePtr<ParameterGUI>> mParameterGUIs;			///< Property: 'ParameterGUIs'
-
-    protected:
-		/**
+    	/**
 		 * Draw window content
 		 */
-		virtual void drawContent(double deltaTime) override;
+    	void drawContent(double deltaTime) override;
 
+    	std::vector<ResourcePtr<ParameterGUI>> mParameterGUIs;			///< Property: 'ParameterGUIs'
+
+    protected:
 		IMGuiService* mGuiService = nullptr;
     };
 

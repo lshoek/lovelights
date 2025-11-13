@@ -131,6 +131,7 @@ namespace nap
 		assert(mRenderService.getCurrentCommandBuffer() != VK_NULL_HANDLE);
 		const VkBufferCopy region = { 0, 0, mCount*sizeof(glm::vec4) };
 		vkCmdCopyBuffer(mRenderService.getCurrentCommandBuffer(), getPositionBuffer(EBufferRank::Read).getBuffer(), getPositionBuffer(EBufferRank::Readback).getBuffer(), 1, &region);
+		vkCmdCopyBuffer(mRenderService.getCurrentCommandBuffer(), getColorBuffer(EBufferRank::Read).getBuffer(), getColorBuffer(EBufferRank::Readback).getBuffer(), 1, &region);
 
 		// Queue download
 		getPositionBuffer(EBufferRank::Readback).asyncGetData([this, count = mCount](const void *data, size_t size)

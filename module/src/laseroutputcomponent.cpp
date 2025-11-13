@@ -40,18 +40,18 @@ RTTI_END_CLASS
 
 
 // Interpolate etherdream value between min / max values
-static int16_t sEtherInterpolate(float value, float min, float max, bool flip)
+static nap::int16 etherInterpolatePosition(float value, float min, float max, bool flip)
 {
-	return (int16_t)fit<float>(value, min, max, 
-		flip ? nap::EtherDreamInterface::etherMax() : nap::EtherDreamInterface::etherMin(),
-		flip ? nap::EtherDreamInterface::etherMin() : nap::EtherDreamInterface::etherMax());
+	return static_cast<nap::int16>(nap::math::fit<float>(value, min, max,
+		flip ? nap::EtherDreamInterface::etherMaxPosition() : nap::EtherDreamInterface::etherMinPosition(),
+		flip ? nap::EtherDreamInterface::etherMinPosition() : nap::EtherDreamInterface::etherMaxPosition()));
 }
 
 
 // Interpolate normalized color channel to min / max laser value 
-static int16_t sEtherInterpolateColor(float inValue)
+static nap::uint16 etherInterpolateColor(float inValue)
 {
-	return static_cast<int16_t>(lerp<float>(0.0f, nap::EtherDreamInterface::etherMax(), inValue));
+	return static_cast<nap::uint16>(nap::math::lerp<float>(0.0f, nap::EtherDreamInterface::etherMaxColor(), inValue));
 }
 
 
@@ -93,6 +93,10 @@ namespace nap
 		if (!mEnabled)
 			return;
 
+		// Check if data is available
+		if (mLineMesh->getPositionsLocal().empty())
+			return;
+
 		// Send the polyline to the dac based on the location of the laser and the location of the line
 		populateLaserBuffer(*mLineMesh, mLineTransform->getGlobalTransform());
 	}
@@ -106,7 +110,7 @@ namespace nap
 		std::vector<glm::vec3> verts3;
 		verts3.reserve(verts.size());
 		for (const auto& v : verts)
-			verts3.push_back(v);
+			verts3.emplace_back(v);
 
 		assert(verts.size() == colors.size());
 		assert(verts.size() > 1);
@@ -137,7 +141,6 @@ namespace nap
 			std::map<float, int> distance_map;
 
 			float line_dist = getDistancesAlongLine(verts3, distance_map, false);
-			// float line_dist = line.getDistances(distance_map);
 
 			// Calculate gap to line point distribution
 			// The bigger the gap between the first and last vertex, the more gap points will be distributed
@@ -151,7 +154,6 @@ namespace nap
 		for (int i = 0; i < line_points; i++)
 		{
 			float sample_idx = line_inc * static_cast<float>(i);
-
 			getValueAlongLine(verts3, sample_idx, is_closed, mVerts[i]);
 			getValueAlongLine(colors, sample_idx, is_closed, mColors[i]);
 		}
@@ -165,7 +167,7 @@ namespace nap
 		{
 			float lerp_v = gapEaseInOut(gap_inc * static_cast<float>((i - line_points) + 1));
 			mVerts[i]  = math::lerp<glm::vec3>(last_vert, first_vert, lerp_v);
-			mColors[i] = { 0.0f, 0.0f,0.0f,0.0f };
+			mColors[i] = { 0.0f, 0.0f, 0.0f, 0.0f };
 		}
 
 		// Get frustum dimensions and transform
@@ -175,7 +177,7 @@ namespace nap
 		float fr_width	= mProperties.mFrustum.x;
 		float fr_height = mProperties.mFrustum.y;
 
-		// Calculate frustrum bounds
+		// Calculate frustum bounds
 		glm::vec2 min_bounds(frustum.x - (fr_width / 2.0f), frustum.y - (fr_height / 2.0f));
 		glm::vec2 max_bounds(frustum.x + (fr_width / 2.0f), frustum.y + (fr_height / 2.0f));
 
@@ -192,12 +194,12 @@ namespace nap
 			const glm::vec4& cc = mColors[i];
 
 			// Sets
-			mPoints[i].X = sEtherInterpolate(cv.x, min_bounds.x, max_bounds.x, false);
-			mPoints[i].Y = sEtherInterpolate(cv.y, min_bounds.y, max_bounds.y, false);
-			mPoints[i].R = sEtherInterpolateColor(cc.r * cc.a);
-			mPoints[i].G = sEtherInterpolateColor(cc.g * cc.a);
-			mPoints[i].B = sEtherInterpolateColor(cc.b * cc.a);
-			mPoints[i].I = sEtherInterpolateColor(cc.a);
+			mPoints[i].X = etherInterpolatePosition(cv.x, min_bounds.x, max_bounds.x, mProperties.mFlipHorizontal);
+			mPoints[i].Y = etherInterpolatePosition(cv.y, min_bounds.y, max_bounds.y, mProperties.mFlipVertical);
+			mPoints[i].R = etherInterpolateColor(cc.r * cc.a);
+			mPoints[i].G = etherInterpolateColor(cc.g * cc.a);
+			mPoints[i].B = etherInterpolateColor(cc.b * cc.a);
+			// mPoints[i].I = sEtherInterpolateColor(cc.a);
 		}
 
 		mDac->setPoints(mPoints);

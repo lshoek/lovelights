@@ -36,8 +36,6 @@ namespace nap
 		void getDependentComponents(std::vector<rtti::TypeInfo>& components) const;
 
 		MaterialInstanceResource mMaterialInstance;								///< Property: 'Material' The material instance resource
-		ResourcePtr<ParameterRGBColorFloat> mColor;								///< Property: 'Color' box base color
-		ResourcePtr<ParameterFloat> mOpacity;									///< Property: 'Opacity' box alpha
 		float mLineWidth = 1.0f;												///< Property: 'LineWidth' line stroke width
 		float mPointSize = 32.0f;												///< Property: 'PointSize' point size
 
@@ -59,11 +57,6 @@ namespace nap
 		 * Checks whether a transform component is available.
 		 */
 		bool init(utility::ErrorState& errorState) override;
-
-		/**
-		 * Update
-		 */
-		void update(double deltatime) override;
 
 		/**
 		 * onDraw() override
@@ -97,10 +90,6 @@ namespace nap
 		UniformMat4Instance*				mProjectMatUniform = nullptr;		///< Pointer to the projection matrix uniform
 		UniformMat4Instance*				mNormalMatrixUniform = nullptr;		///< Pointer to the normal matrix uniform
 		UniformVec3Instance*				mCameraWorldPosUniform = nullptr;	///< Pointer to the camera world position uniform
-
-		UniformStructInstance*				mUBOStruct = nullptr;				///< UBO struct
-		UniformVec3Instance*				mColorUniform = nullptr;			///< Constant color uniform
-		UniformFloatInstance*				mAlphaUniform = nullptr;			///< Alpha uniform
 
 		LineMesh* 							mMesh = nullptr;
 	};
