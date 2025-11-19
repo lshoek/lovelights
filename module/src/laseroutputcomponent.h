@@ -14,7 +14,7 @@
 #include <componentptr.h>
 #include <renderablemeshcomponent.h>
 #include <nap/resourceptr.h>
-
+#include <parameternumeric.h>
 
 namespace nap
 {

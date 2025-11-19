@@ -7,6 +7,8 @@
 #include <componentptr.h>
 #include <parameterblendcomponent.h>
 
+#include "playlistcontrolcomponent.h"
+
 namespace nap
 {
     class PlaylistControlComponentInstance;
@@ -45,6 +47,7 @@ namespace nap
 
         std::vector<ResourcePtr<Item>> mItems;			// List of presets in the sequence accompanied by meta data
         ResourcePtr<Item> mIdleItem;                    //
+        ResourcePtr<ParameterInt> mSelectItemIndex;     //
 		bool mEnable;									// True to enable the preset cycle
         bool mRandomizePlaylist = false;				// Indicates whether the order of the cycle of presets will be shuffled
         bool mVerbose = true;							// Whether to log playlist changes
@@ -131,6 +134,9 @@ namespace nap
 
         // Selects the next preset in the sequence
         void nextItem();
+
+        void onSelectItem(int index) { setItem(index); }
+        nap::Slot<int> mSelectItemIndexChangedSlot = { this, &PlaylistControlComponentInstance::onSelectItem };
 
 		PlaylistControlComponent* mResource = nullptr;
 

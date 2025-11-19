@@ -25,6 +25,7 @@ RTTI_END_CLASS
 RTTI_BEGIN_CLASS(nap::PlaylistControlComponent)
 	RTTI_PROPERTY("Items", &nap::PlaylistControlComponent::mItems, nap::rtti::EPropertyMetaData::Embedded)
 	RTTI_PROPERTY("IdleItem", &nap::PlaylistControlComponent::mIdleItem, nap::rtti::EPropertyMetaData::Embedded)
+	RTTI_PROPERTY("SelectItemIndex", &nap::PlaylistControlComponent::mSelectItemIndex, nap::rtti::EPropertyMetaData::Default)
 	RTTI_PROPERTY("RandomizePlaylist", &nap::PlaylistControlComponent::mRandomizePlaylist, nap::rtti::EPropertyMetaData::Default)
 	RTTI_PROPERTY("Enable", &nap::PlaylistControlComponent::mEnable, nap::rtti::EPropertyMetaData::Default)
     RTTI_PROPERTY("Verbose", &nap::PlaylistControlComponent::mVerbose, nap::rtti::EPropertyMetaData::Default)
@@ -230,6 +231,10 @@ namespace nap
 				blender->mPresetIndex->setValue(group.mPresetIndex);
 			}
         }
+
+		if (mResource->mSelectItemIndex != nullptr)
+			mResource->mSelectItemIndex->valueChanged.connect(mSelectItemIndexChangedSlot);
+
 		return true;
 	}
 

@@ -52,6 +52,7 @@ uniform UBO
 	float shift;
 	float timeshift;
 	float alpha;
+	float brightness;
 	vec4 colorOne;
 	vec4 colorTwo;
 	uint count;
@@ -126,5 +127,5 @@ void main()
 	// const float pct = pow(1.0-abs(clamp(uv.x*2.0-0.5, 0.0, 1.0)), 2.0);
 	// const vec4 col = mix(ubo.colorOne, ubo.colorTwo, pct);
 	const vec4 col = ubo.colorOne;
-	outcolors[gid] = vec4(col.rgb, pow(ubo.alpha, 3.0));
+	outcolors[gid] = vec4(col.rgb * pow(ubo.brightness, 3.0), pow(ubo.alpha, 3.0));
 }

@@ -29,6 +29,7 @@ namespace nap
 		ResourcePtr<ParameterRGBAColorFloat> mColorOne;		//< Property: 'ColorOne' line primary color
 		ResourcePtr<ParameterRGBAColorFloat> mColorTwo;		//< Property: 'ColorTwo' line secondary color
 		ResourcePtr<ParameterFloat> mOpacity;				//< Property: 'Opacity' line alpha
+		ResourcePtr<ParameterFloat> mBrightness;			//< Property: 'Brightness' line brightness
 		float mSmoothTime = 0.1f;							//< Smooth time
 	};
 
@@ -98,6 +99,5 @@ namespace nap
 		math::SmoothOperator<double> mSpeedSmoother			{ 0.0, 0.1 };
 		math::SmoothOperator<double> mOffsetSmoother		{ 0.0, 0.1 };
 		math::SmoothOperator<double> mShiftSmoother			{ 0.0, 0.1 };
-		math::SmoothOperator<double> mTimeShiftSmoother			{ 0.0, 0.1 };
 	};
 }

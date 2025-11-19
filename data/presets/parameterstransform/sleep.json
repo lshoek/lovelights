@@ -1,0 +1,32 @@
+{
+    "Objects": [
+        {
+            "Type": "nap::ParameterGroup",
+            "mID": "ParametersTransform",
+            "Parameters": [
+                {
+                    "Type": "nap::ParameterVec3",
+                    "mID": "LineScaleParam",
+                    "Name": "Scale",
+                    "Value": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 1.0
+                    },
+                    "Clamp": true,
+                    "Minimum": 0.0,
+                    "Maximum": 2.0
+                },
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LineOpacityParam",
+                    "Name": "Opacity",
+                    "Value": 0.0,
+                    "Minimum": 0.0,
+                    "Maximum": 1.0
+                }
+            ],
+            "Groups": []
+        }
+    ]
+}

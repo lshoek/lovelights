@@ -26,7 +26,7 @@ RTTI_END_STRUCT
 
 RTTI_BEGIN_CLASS(nap::LaserOutputComponent)
 	RTTI_PROPERTY("Dac",			&nap::LaserOutputComponent::mDac,				nap::rtti::EPropertyMetaData::Required)
-	RTTI_PROPERTY("Line",			&nap::LaserOutputComponent::mLineMesh,				nap::rtti::EPropertyMetaData::Required)
+	RTTI_PROPERTY("Line",			&nap::LaserOutputComponent::mLineMesh,			nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Transform",		&nap::LaserOutputComponent::mLineTransform,		nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Properties",		&nap::LaserOutputComponent::mProperties,		nap::rtti::EPropertyMetaData::Required | nap::rtti::EPropertyMetaData::Embedded)
 	RTTI_PROPERTY("Enable",			&nap::LaserOutputComponent::mEnable,			nap::rtti::EPropertyMetaData::Default)

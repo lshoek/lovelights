@@ -212,6 +212,7 @@
                         "ColorOne": "LineColorOneParam",
                         "ColorTwo": "LineColorTwoParam",
                         "Opacity": "LineOpacityParam",
+                        "Brightness": "LineBrightnessParam",
                         "SmoothTime": 0.10000000149011612
                     },
                     "ClockSpeed": 1.0,
@@ -326,6 +327,28 @@
         },
         {
             "Type": "nap::Entity",
+            "mID": "OSCEntity",
+            "Components": [
+                {
+                    "Type": "nap::OscHandlerComponent",
+                    "mID": "OscHandlerComponent",
+                    "ParameterGroups": [
+                        "ParametersOSC"
+                    ],
+                    "Verbose": true
+                },
+                {
+                    "Type": "nap::OSCInputComponent",
+                    "mID": "OSCInputComponent",
+                    "Addresses": [
+                        ""
+                    ]
+                }
+            ],
+            "Children": []
+        },
+        {
+            "Type": "nap::Entity",
             "mID": "PlaylistEntity",
             "Components": [
                 {
@@ -410,6 +433,7 @@
                         "DurationDeviation": 0.0,
                         "TransitionTime": 2.0
                     },
+                    "SelectItemIndex": "LineParameterSelect",
                     "RandomizePlaylist": false,
                     "Enable": true,
                     "Verbose": true
@@ -733,6 +757,13 @@
             "Count": 1024
         },
         {
+            "Type": "nap::OSCReceiver",
+            "mID": "OSCReceiver",
+            "Port": 7000,
+            "EnableDebugOutput": true,
+            "AllowPortReuse": false
+        },
+        {
             "Type": "nap::ParameterGroup",
             "mID": "ParametersLaser",
             "Parameters": [
@@ -815,6 +846,29 @@
         },
         {
             "Type": "nap::ParameterGroup",
+            "mID": "ParametersOSC",
+            "Parameters": [
+                {
+                    "Type": "nap::ParameterFloat",
+                    "mID": "LineBrightnessParam",
+                    "Name": "Brightness",
+                    "Value": 1.0,
+                    "Minimum": 0.0,
+                    "Maximum": 1.0
+                },
+                {
+                    "Type": "nap::ParameterInt",
+                    "mID": "LineParameterSelect",
+                    "Name": "Select",
+                    "Value": 0,
+                    "Minimum": -1,
+                    "Maximum": 2
+                }
+            ],
+            "Groups": []
+        },
+        {
+            "Type": "nap::ParameterGroup",
             "mID": "ParametersTransform",
             "Parameters": [
                 {
@@ -847,7 +901,8 @@
             "Name": "Parameters",
             "ParameterGUIs": [
                 "ParametersLaserGUI",
-                "ParametersTransformGUI"
+                "ParametersTransformGUI",
+                "ParametersOSCGUI"
             ]
         },
         {
@@ -984,6 +1039,12 @@
                     "mID": "ParametersLaserGUI",
                     "Serializable": true,
                     "Group": "ParametersLaser"
+                },
+                {
+                    "Type": "nap::ParameterGUI",
+                    "mID": "ParametersOSCGUI",
+                    "Serializable": true,
+                    "Group": "ParametersOSC"
                 },
                 {
                     "Type": "nap::ParameterBlendGroup",
@@ -1315,6 +1376,10 @@
                 },
                 {
                     "Entity": "ComputeEntity",
+                    "InstanceProperties": []
+                },
+                {
+                    "Entity": "OSCEntity",
                     "InstanceProperties": []
                 }
             ]

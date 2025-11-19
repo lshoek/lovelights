@@ -22,6 +22,7 @@ RTTI_BEGIN_STRUCT(nap::NoiseProperties)
 	RTTI_PROPERTY("ColorOne",			&nap::NoiseProperties::mColorOne,			nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("ColorTwo",			&nap::NoiseProperties::mColorTwo,			nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("Opacity",			&nap::NoiseProperties::mOpacity,			nap::rtti::EPropertyMetaData::Required)
+	RTTI_PROPERTY("Brightness",			&nap::NoiseProperties::mBrightness,			nap::rtti::EPropertyMetaData::Required)
 	RTTI_PROPERTY("SmoothTime",			&nap::NoiseProperties::mSmoothTime,			nap::rtti::EPropertyMetaData::Default)
 RTTI_END_STRUCT
 
@@ -73,7 +74,7 @@ namespace nap
 		createBufferBinding("InColors", mLineMesh->getColorBuffer(LineMesh::EBufferRank::Read), getMaterialInstance());
 
 		// Set smooth timing values
-		for (auto* smoother : { &mAmplitudeSmoother, &mWavelengthSmoother, &mOffsetSmoother, &mSpeedSmoother, &mShiftSmoother, &mTimeShiftSmoother })
+		for (auto* smoother : { &mAmplitudeSmoother, &mWavelengthSmoother, &mOffsetSmoother, &mSpeedSmoother, &mShiftSmoother })
 			smoother->mSmoothTime = mProperties.mSmoothTime;
 
 		mAmplitudeSmoother.setValue(mProperties.mAmplitude->mValue);
@@ -81,7 +82,6 @@ namespace nap
 		mOffsetSmoother.setValue(mProperties.mOffset->mValue);
 		mSpeedSmoother.setValue(mProperties.mClockSpeed->mValue);
 		mShiftSmoother.setValue(mProperties.mShift->mValue);
-		mTimeShiftSmoother.setValue(mProperties.mTimeShift->mValue);
 
 		mRandomSeed =
 		{
@@ -107,7 +107,6 @@ namespace nap
 		mAmplitudeSmoother.update(mProperties.mAmplitude->mValue, deltaTime);
 		mOffsetSmoother.update(mProperties.mOffset->mValue, deltaTime);
 		mShiftSmoother.update(mProperties.mShift->mValue, deltaTime);
-		mTimeShiftSmoother.update(mProperties.mTimeShift->mValue, deltaTime);
 
 		// Update current time
 		mElapsedClockTime += (deltaTime * mSpeedSmoother.getValue() * mClockSpeed);
@@ -117,10 +116,11 @@ namespace nap
 		ubo->getOrCreateUniform<UniformFloatInstance>("amplitude")->setValue(mAmplitudeSmoother.getValue());
 		ubo->getOrCreateUniform<UniformFloatInstance>("offset")->setValue(mOffsetSmoother.getValue());
 		ubo->getOrCreateUniform<UniformFloatInstance>("shift")->setValue(mShiftSmoother.getValue());
-		ubo->getOrCreateUniform<UniformFloatInstance>("timeshift")->setValue(mTimeShiftSmoother.getValue());
+		ubo->getOrCreateUniform<UniformFloatInstance>("timeshift")->setValue(mProperties.mTimeShift->mValue);
 		ubo->getOrCreateUniform<UniformVec4Instance>("colorOne")->setValue(mProperties.mColorOne->mValue.toVec4());
 		ubo->getOrCreateUniform<UniformVec4Instance>("colorTwo")->setValue(mProperties.mColorTwo->mValue.toVec4());
 		ubo->getOrCreateUniform<UniformFloatInstance>("alpha")->setValue(mProperties.mOpacity->mValue);
+		ubo->getOrCreateUniform<UniformFloatInstance>("brightness")->setValue(mProperties.mBrightness->mValue);
 		ubo->getOrCreateUniform<UniformUIntInstance>("count")->setValue(mLineMesh->getMeshInstance().getNumVertices());
 	}
 
