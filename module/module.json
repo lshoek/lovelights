@@ -2,13 +2,13 @@
     "Type": "nap::ModuleInfo",
     "mID": "ModuleInfo",
     "RequiredModules": [
+        "naprenderadvanced",
         "napinput",
         "napcameracontrol",
         "napparameter",
         "napappgui",
         "napparametergui",
         "napetherdream",
-        "napwarp",
         "naposc"
     ],
     "WindowsDllSearchPaths": []
